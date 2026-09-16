@@ -1,1 +1,0 @@
-import{c as D,et as Wn}from"./chunk-Cj_Qu8xD.js";import{o as Gs}from"./main-VJX5AXHM.js";var s=class r{supabase=D(Gs);listar(){return this.supabase.client.from(`salas`).select(`id, nombre`).order(`nombre`)}crear(e){return this.supabase.client.from(`salas`).insert({nombre:e})}static ɵfac=function(o){return new(o||r)};static ɵprov=Wn({token:r,factory:r.ɵfac})};export{s as t};
