@@ -138,7 +138,7 @@ El profesor confirmó en la primera entrega (mostrando el documento de requerimi
 
 ## **Estado real del desarrollo**
 
-*Detalle granular para uso propio — la versión resumida para dar contexto rápido está en el "Estado actual" de `CLAUDE.md`.*
+*Detalle granular para uso propio — hay una versión resumida en las notas de contexto del proyecto (no versionadas).*
 
 ### **Hecho**
 
