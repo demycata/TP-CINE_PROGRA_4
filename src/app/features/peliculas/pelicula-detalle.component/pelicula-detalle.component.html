@@ -1,0 +1,52 @@
+<a routerLink="/" class="volver">← Volver</a>
+
+@if (cargando()) {
+  <app-spinner />
+} @else if (pelicula(); as peli) {
+  <div class="detalle">
+    <div class="poster"><img [src]="peli.imagen_url" [alt]="peli.titulo"></div>
+
+    <div class="info">
+      <h1>{{ peli.titulo }}</h1>
+      <p class="generos">{{ peli.generos?.join(', ') }}</p>
+      <p class="meta">
+        {{ peli.duracion_minutos }} min
+        @if (peli.restriccion_edad) {
+          <span class="restriccion">+{{ peli.restriccion_edad }}</span>
+        }
+      </p>
+      <p class="sinopsis">{{ peli.sinopsis }}</p>
+    </div>
+  </div>
+
+  <section class="funciones">
+    <h2>Funciones</h2>
+
+    @if (funciones().length === 0) {
+      <p class="vacio">No hay funciones programadas todavía.</p>
+    } @else {
+      <div class="lista-funciones">
+        @for (funcion of funciones(); track funcion.id) {
+          <button
+            type="button"
+            class="funcion"
+            [class.seleccionada]="funcionSeleccionada()?.id === funcion.id"
+            (click)="seleccionarFuncion(funcion)"
+          >
+            <span class="fecha">{{ funcion.fecha }}</span>
+            <span class="hora">{{ funcion.hora_inicio }}</span>
+            <span class="sala">{{ funcion.salas?.nombre }}</span>
+            <span class="formato">{{ funcion.formato }} · {{ funcion.idioma }}</span>
+            <span class="precio">${{ funcion.precio_base }}</span>
+          </button>
+        }
+      </div>
+
+      @if (funcionSeleccionada(); as elegida) {
+        <button type="button" class="btn-comprar" (click)="irAButacas()">
+          Siguiente — {{ elegida.fecha }} {{ elegida.hora_inicio.slice(0, 5) }}
+        </button>
+      }
+    }
+  </section>
+}

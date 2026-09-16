@@ -1,0 +1,36 @@
+<a routerLink="/admin">← Volver</a>
+
+<h2>Usuarios</h2>
+
+@if (error()) {
+    <small class="error">{{ error() }}</small>
+}
+
+@if (cargando()) {
+    <app-spinner />
+} @else {
+<table>
+    <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Apellido</th>
+            <th>Rol</th>
+        </tr>
+    </thead>
+    <tbody>
+        @for (usuario of usuarios(); track usuario.id) {
+            <tr>
+                <td>{{ usuario.nombre }}</td>
+                <td>{{ usuario.apellido }}</td>
+                <td>
+                    <select [value]="usuario.rol" (change)="cambiarRol(usuario, $any($event.target).value)">
+                        <option value="cliente">Cliente</option>
+                        <option value="empleado">Empleado</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+}

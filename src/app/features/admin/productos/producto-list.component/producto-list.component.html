@@ -1,0 +1,33 @@
+<a routerLink="/admin">← Volver</a>
+
+<h2>Productos</h2>
+<a routerLink="/admin/productos/nuevo">Nuevo producto</a>
+
+@if (cargando()) {
+    <app-spinner />
+} @else {
+<table>
+    <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Categoría</th>
+            <th>Precio</th>
+            <th>Activo</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @for (producto of productos(); track producto.id) {
+            <tr>
+                <td>{{ producto.nombre }}</td>
+                <td>{{ producto.categorias_producto?.nombre }}</td>
+                <td>{{ producto.precio }}</td>
+                <td>{{ producto.activo ? 'Sí' : 'No' }}</td>
+                <td>
+                    <a [routerLink]="['/admin/productos', producto.id, 'editar']">Editar</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+}

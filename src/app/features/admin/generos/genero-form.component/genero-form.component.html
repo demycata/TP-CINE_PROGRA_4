@@ -1,0 +1,17 @@
+<a routerLink="/admin">← Volver</a>
+
+<form class="form" [formGroup]="formGenero" (ngSubmit)="onSubmit()">
+    <h2>Crear Género</h2>
+
+    <label for="nombre">Nombre:</label>
+    <input type="text" id="nombre" formControlName="nombre">
+
+    @if (error()) {
+        <small class="error">{{ error() }}</small>
+    }
+
+    <button type="submit" [disabled]="enviado()">
+        @if (enviado()) { <app-spinner [inline]="true" /> }
+        Guardar
+    </button>
+</form>

@@ -1,0 +1,26 @@
+<header class="header">
+    <div class="logo">CINE</div>
+
+    <input type="search" class="buscador" placeholder="Buscar película...">
+
+
+<!-- manejo de distinos nav segun la session -->
+    <div class="acciones">
+        @if (!auth.session()) {
+            <a routerLink="/registro" class="btn">Registrar</a>
+            <a routerLink="/login" class="btn">Login</a>
+        } @else if (auth.rol() === 'admin') {
+            <a routerLink="/admin" class="btn">Admin</a>
+            <button type="button" [disabled]="cerrandoSesion()" (click)="cerrarSesion()">
+                @if (cerrandoSesion()) { <app-spinner [inline]="true" /> }
+                Cerrar sesión
+            </button>
+        } @else {
+            <a routerLink="/perfil" class="btn">Perfil</a>
+            <button type="button" [disabled]="cerrandoSesion()" (click)="cerrarSesion()">
+                @if (cerrandoSesion()) { <app-spinner [inline]="true" /> }
+                Cerrar sesión
+            </button>
+        }
+    </div>
+</header>

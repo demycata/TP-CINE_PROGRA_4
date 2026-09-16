@@ -1,0 +1,36 @@
+<a routerLink="/admin">← Volver</a>
+
+<h2>Películas</h2>
+<a routerLink="/admin/peliculas/nueva">Nueva película</a>
+
+@if (cargando()) {
+    <app-spinner />
+} @else {
+<table>
+    <thead>
+        <tr>
+            <th>Título</th>
+            <th>Duración</th>
+            <th>Estreno</th>
+            <th>Activa</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @for (pelicula of peliculas(); track pelicula.id) {
+            <tr>
+                <td>{{ pelicula.titulo }}</td>
+                <td>{{ pelicula.duracion_minutos }} min</td>
+                <td>{{ pelicula.fecha_estreno }}</td>
+                <td>{{ pelicula.activa ? 'Sí' : 'No' }}</td>
+                <td>
+                    <a [routerLink]="['/admin/peliculas', pelicula.id, 'editar']">Editar</a>
+                    <button type="button" (click)="toggleActiva(pelicula)">
+                        {{ pelicula.activa ? 'Desactivar' : 'Activar' }}
+                    </button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+}

@@ -1,0 +1,50 @@
+
+@if (cargando()) {
+    <app-spinner />
+} @else {
+<section class="banners">
+    <div class="banner"></div>
+    <div class="banner"></div>
+    <div class="banner"></div>
+</section>
+
+<section>
+    <h2>Más vistas</h2>
+    <div class="grid">
+        @for (peli of masVistas(); track $index) {
+            <a class="card" appHoverScale [routerLink]="['/peliculas', peli.id]">
+                <div class="poster"><img [src]="peli.imagen_url" [alt]="peli.titulo"></div>
+                <p class="titulo">{{ peli.titulo }}</p>
+                <p class="generos">{{ peli.generos?.join(', ') }}</p>
+            </a>
+        }
+    </div>
+</section>
+
+<section>
+    <h2>Próximos Lanzamientos</h2>
+    <div class="grid">
+        @for (item of peliculas(); track $index) {
+            <a class="card" appHoverScale [routerLink]="['/peliculas', item.id]">
+                <div class="poster"><img [src]="item.imagen_url" [alt]="item.titulo"></div>
+                <p class="titulo">{{ item.titulo }}</p>
+                <p class="generos">{{ item.generos?.join(', ') }}</p>
+            </a>
+        }
+    </div>
+</section>
+
+<section>
+    <h2>Anime</h2>
+    <div class="grid">
+        @for (item of peliculas(); track $index) {
+            @if (item.generos?.includes('Anime')) {
+            <a class="card" appHoverScale [routerLink]="['/peliculas', item.id]">
+                <div class="poster"><img [src]="item.imagen_url" [alt]="item.titulo"></div>
+                <p class="titulo">{{ item.titulo }}</p>
+                <p class="generos">{{ item.generos?.join(', ') }}</p>
+            </a>
+        }}
+    </div>
+</section>
+}

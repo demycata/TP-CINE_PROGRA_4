@@ -1,1 +1,35 @@
 /* You can add global styles to this file, and also import other style files */
+:root {
+  /* Paleta */
+  --color-fondo: #14171a;
+  --color-superficie: #1e2226;
+  --color-primario: #2dd4bf;
+  --color-primario-hover: #26b8a5;
+  --color-acento: #ff6b5e;
+  --color-texto: #e8e8e6;
+  --color-texto-secundario: #a0a4a8;
+
+  /* Tipografía */
+  --fuente-base: system-ui, -apple-system, sans-serif;
+  --tamano-sm: 0.875rem;
+  --tamano-base: 1rem;
+  --tamano-lg: 1.25rem;
+  --tamano-xl: 1.75rem;
+
+  /* Espaciado */
+  --espacio-xs: 0.25rem;
+  --espacio-sm: 0.5rem;
+  --espacio-md: 1rem;
+  --espacio-lg: 2rem;
+  --espacio-xl: 3rem;
+
+  /* Bordes */
+  --radio-borde: 8px;
+}
+
+body {
+  background-color: var(--color-fondo);
+  color: var(--color-texto);
+  font-family: var(--fuente-base);
+  margin: 0;
+}

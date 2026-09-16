@@ -1,0 +1,94 @@
+@if (cargando()) {
+  <app-spinner />
+} @else if (pelicula(); as peli) {
+  @if (funcion(); as func) {
+    <a [routerLink]="['/peliculas', peli.id]" class="volver">← Volver</a>
+
+    <h1>{{ peli.titulo }}</h1>
+    <p class="meta">
+      {{ func.fecha }} {{ func.hora_inicio.slice(0, 5) }} · {{ func.salas?.nombre }} · {{ func.formato }} · {{ func.idioma }}
+    </p>
+
+    <div class="leyenda">
+      <span class="item"><span class="muestra libre"></span> Libre</span>
+      <span class="item"><span class="muestra ocupada"></span> Ocupada</span>
+      <span class="item"><span class="muestra accesible"></span> Accesible</span>
+      <span class="item"><span class="muestra vip"></span> VIP</span>
+      <span class="item"><span class="muestra seleccionada"></span> Seleccionada</span>
+    </div>
+
+    <div class="pantalla">PANTALLA</div>
+
+    <div class="mapa">
+      @for (fila of filas(); track fila.fila) {
+        <div class="fila">
+          <span class="etiqueta-fila">{{ fila.fila }}</span>
+
+          <div class="bloque">
+            @for (butaca of fila.izquierda; track butaca.id) {
+              <button
+                type="button"
+                class="butaca"
+                [class.ocupada]="ocupadas().has(butaca.id)"
+                [class.accesible]="butaca.tipo_butaca === 'accesible'"
+                [class.vip]="butaca.tipo_butaca === 'vip'"
+                [class.seleccionada]="butacaSeleccionada()?.id === butaca.id"
+                [disabled]="ocupadas().has(butaca.id)"
+                (click)="seleccionarButaca(butaca)"
+                [title]="fila.fila + butaca.columna"
+              ></button>
+            }
+          </div>
+
+          <div class="bloque">
+            @for (butaca of fila.centro; track butaca.id) {
+              <button
+                type="button"
+                class="butaca"
+                [class.ocupada]="ocupadas().has(butaca.id)"
+                [class.accesible]="butaca.tipo_butaca === 'accesible'"
+                [class.vip]="butaca.tipo_butaca === 'vip'"
+                [class.seleccionada]="butacaSeleccionada()?.id === butaca.id"
+                [disabled]="ocupadas().has(butaca.id)"
+                (click)="seleccionarButaca(butaca)"
+                [title]="fila.fila + butaca.columna"
+              ></button>
+            }
+          </div>
+
+          <div class="bloque">
+            @for (butaca of fila.derecha; track butaca.id) {
+              <button
+                type="button"
+                class="butaca"
+                [class.ocupada]="ocupadas().has(butaca.id)"
+                [class.accesible]="butaca.tipo_butaca === 'accesible'"
+                [class.vip]="butaca.tipo_butaca === 'vip'"
+                [class.seleccionada]="butacaSeleccionada()?.id === butaca.id"
+                [disabled]="ocupadas().has(butaca.id)"
+                (click)="seleccionarButaca(butaca)"
+                [title]="fila.fila + butaca.columna"
+              ></button>
+            }
+          </div>
+        </div>
+      }
+    </div>
+
+    <div class="resumen">
+      @if (butacaSeleccionada(); as butaca) {
+        <p>Butaca elegida: <strong>{{ butaca.fila }}{{ butaca.columna }}</strong> — ${{ func.precio_base }}</p>
+        <button type="button" class="btn-comprar" [disabled]="generandoPdf()" (click)="comprar()">
+          @if (generandoPdf()) { <app-spinner [inline]="true" /> }
+          {{ generandoPdf() ? 'Generando...' : 'Comprar' }}
+        </button>
+      } @else {
+        <p class="ayuda">Elegí una butaca libre para continuar.</p>
+      }
+
+      @if (error()) {
+        <p class="error">{{ error() }}</p>
+      }
+    </div>
+  }
+}

@@ -1,0 +1,39 @@
+<a routerLink="/admin">← Volver</a>
+
+<h2>Funciones</h2>
+<a routerLink="/admin/funciones/nueva">Nueva función</a>
+
+@if (cargando()) {
+    <app-spinner />
+} @else {
+<table>
+    <thead>
+        <tr>
+            <th>Película</th>
+            <th>Sala</th>
+            <th>Fecha</th>
+            <th>Horario</th>
+            <th>Formato</th>
+            <th>Idioma</th>
+            <th>Precio</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @for (funcion of funciones(); track funcion.id) {
+            <tr>
+                <td>{{ funcion.peliculas?.titulo }}</td>
+                <td>{{ funcion.salas?.nombre }}</td>
+                <td>{{ funcion.fecha }}</td>
+                <td>{{ funcion.hora_inicio }} - {{ funcion.hora_fin }}</td>
+                <td>{{ funcion.formato }}</td>
+                <td>{{ funcion.idioma }}</td>
+                <td>{{ funcion.precio_base }}</td>
+                <td>
+                    <a [routerLink]="['/admin/funciones', funcion.id, 'editar']">Editar</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+}

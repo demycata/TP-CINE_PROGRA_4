@@ -1,0 +1,47 @@
+<a routerLink="/admin/peliculas">← Volver</a>
+
+@if (cargando()) {
+    <app-spinner />
+} @else {
+<form class="form" [formGroup]="formPelicula" (ngSubmit)="onSubmit()">
+    <h2>{{ idPelicula ? 'Editar' : 'Crear' }} Película</h2>
+
+    <label for="titulo">Título:</label>
+    <input type="text" id="titulo" formControlName="titulo">
+
+    <label for="sinopsis">Sinopsis:</label>
+    <textarea id="sinopsis" formControlName="sinopsis"></textarea>
+
+    <label for="duracion_minutos">Duración (minutos):</label>
+    <input type="number" id="duracion_minutos" formControlName="duracion_minutos">
+
+    <label for="imagen_url">Imagen (URL):</label>
+    <input type="text" id="imagen_url" formControlName="imagen_url">
+
+    <label for="restriccion_edad">Restricción de edad:</label>
+    <select id="restriccion_edad" formControlName="restriccion_edad">
+        <option value="">Sin restricción</option>
+        <option value="13">+13</option>
+        <option value="18">+18</option>
+    </select>
+
+    <label for="fecha_estreno">Fecha de estreno:</label>
+    <input type="date" id="fecha_estreno" formControlName="fecha_estreno">
+
+    <label for="generos">Géneros:</label>
+    <select id="generos" formControlName="generos" multiple>
+        @for (genero of generosDisponibles(); track genero.id) {
+            <option [value]="genero.nombre">{{ genero.nombre }}</option>
+        }
+    </select>
+
+    @if (error()) {
+        <small class="error">{{ error() }}</small>
+    }
+
+    <button type="submit" [disabled]="enviado()">
+        @if (enviado()) { <app-spinner [inline]="true" /> }
+        Guardar
+    </button>
+</form>
+}

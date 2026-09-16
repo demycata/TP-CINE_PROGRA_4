@@ -1,0 +1,25 @@
+.spinner {
+  display: block;
+  width: 2rem;
+  height: 2rem;
+  margin: var(--espacio-lg) auto;
+  border: 3px solid var(--color-superficie);
+  border-top-color: var(--color-primario);
+  border-radius: 50%;
+  animation: girar 0.7s linear infinite;
+}
+
+.spinner-inline {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  margin: 0 var(--espacio-sm) 0 0;
+  border-width: 2px;
+  vertical-align: middle;
+}
+
+@keyframes girar {
+  to {
+    transform: rotate(360deg);
+  }
+}

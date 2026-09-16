@@ -1,0 +1,56 @@
+<a routerLink="/admin/funciones">← Volver</a>
+
+@if (cargando()) {
+    <app-spinner />
+} @else {
+<form class="form" [formGroup]="formFuncion" (ngSubmit)="onSubmit()">
+    <!-- maneja al edicio y creacion -->
+    <h2>{{ idFuncion ? 'Editar' : 'Crear' }} Función</h2> 
+
+    <label for="pelicula_id">Película:</label>
+    <select id="pelicula_id" formControlName="pelicula_id">
+        <option value="" disabled>Elegí una película</option>
+        @for (pelicula of peliculasDisponibles(); track pelicula.id) {
+            <option [value]="pelicula.id">{{ pelicula.titulo }}</option>
+        }
+    </select>
+
+    <label for="fecha">Fecha:</label>
+    <input type="date" id="fecha" formControlName="fecha">
+
+    <label for="hora_inicio">Hora de inicio:</label>
+    <input type="time" id="hora_inicio" formControlName="hora_inicio">
+
+    <label for="formato">Formato:</label>
+    <select id="formato" formControlName="formato">
+        <option value="2D">2D</option>
+        <option value="3D">3D</option>
+        <option value="4D">4D</option>
+        <option value="5D">5D</option>
+    </select>
+
+    <label for="idioma">Idioma:</label>
+    <select id="idioma" formControlName="idioma">
+        <option value="castellano">Castellano</option>
+        <option value="subtitulada">Subtitulada</option>
+    </select>
+
+    <label for="precio_base">Precio base:</label>
+    <input type="number" id="precio_base" step="0.01" formControlName="precio_base">
+
+    <label for="precio_preventa">Precio de preventa (opcional):</label>
+    <input type="number" id="precio_preventa" step="0.01" formControlName="precio_preventa">
+
+    <label for="fecha_fin_preventa">Cierre de preventa (opcional):</label>
+    <input type="date" id="fecha_fin_preventa" formControlName="fecha_fin_preventa">
+
+    @if (error()) {
+        <small class="error">{{ error() }}</small>
+    }
+
+    <button type="submit" [disabled]="enviado()">
+        @if (enviado()) { <app-spinner [inline]="true" /> }
+        Guardar
+    </button>
+</form>
+}

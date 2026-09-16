@@ -1,0 +1,62 @@
+<form class="form" [formGroup]="formRegistro" (ngSubmit)="onSubmit()">
+    <h2>Registrarse</h2>
+
+    <label for="nombre">Nombre:</label>
+    <input type="text" id="nombre" formControlName="nombre">
+    @if (formRegistro.controls.nombre.touched && formRegistro.controls.nombre.invalid) {
+        <small class="error">Ingresá tu nombre.</small>
+    }
+
+    <label for="apellido">Apellido:</label>
+    <input type="text" id="apellido" formControlName="apellido">
+    @if (formRegistro.controls.apellido.touched && formRegistro.controls.apellido.invalid) {
+        <small class="error">Ingresá tu apellido.</small>
+    }
+
+    <label for="email">Email:</label>
+    <input type="email" id="email" formControlName="email">
+    @if (formRegistro.controls.email.touched && formRegistro.controls.email.invalid) {
+        <small class="error">Ingresá un email válido.</small>
+    }
+
+    <label for="password">Password:</label>
+    <input type="password" id="password" formControlName="password">
+    @if (formRegistro.controls.password.touched && formRegistro.controls.password.invalid) {
+        <small class="error">La contraseña debe tener al menos 6 caracteres.</small>
+    }
+
+    <label for="fecha_nacimiento">Fecha de nacimiento:</label>
+    <input type="date" id="fecha_nacimiento" formControlName="fecha_nacimiento">
+    @if (formRegistro.controls.fecha_nacimiento.touched && formRegistro.controls.fecha_nacimiento.invalid) {
+        <small class="error">Ingresá tu fecha de nacimiento.</small>
+    }
+
+    <label for="tipo_sangre">Tipo de sangre:</label>
+    <input type="text" id="tipo_sangre" formControlName="tipo_sangre" placeholder="Ej: O+">
+    @if (formRegistro.controls.tipo_sangre.touched && formRegistro.controls.tipo_sangre.invalid) {
+        <small class="error">Ingresá tu tipo de sangre.</small>
+    }
+
+    <label for="color_ojos">Color de ojos:</label>
+    <input type="text" id="color_ojos" formControlName="color_ojos">
+    @if (formRegistro.controls.color_ojos.touched && formRegistro.controls.color_ojos.invalid) {
+        <small class="error">Ingresá el color de tus ojos.</small>
+    }
+
+    <label for="dias_vacaciones_anio">Días de vacaciones al año:</label>
+    <input type="number" id="dias_vacaciones_anio" formControlName="dias_vacaciones_anio" min="0">
+    @if (formRegistro.controls.dias_vacaciones_anio.touched && formRegistro.controls.dias_vacaciones_anio.invalid) {
+        <small class="error">Ingresá un número válido.</small>
+    }
+
+    @if (error()) {
+        <small class="error">{{ error() }}</small>
+    }
+
+    <button type="submit" [disabled]="enviado()">
+        @if (enviado()) { <app-spinner [inline]="true" /> }
+        {{ enviado() ? 'Registrando...' : 'Registrarse' }}
+    </button>
+
+    <a routerLink="/login">¿Ya tenés cuenta? Iniciá sesión</a>
+</form>
