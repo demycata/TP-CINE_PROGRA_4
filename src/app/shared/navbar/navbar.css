@@ -33,3 +33,7 @@ button {
   text-decoration: none;
   cursor: pointer;
 }
+
+.btn.activo {
+  background-color: var(--color-acento);
+}

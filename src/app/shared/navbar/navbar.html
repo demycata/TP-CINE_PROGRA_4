@@ -7,16 +7,11 @@
 <!-- manejo de distinos nav segun la session -->
     <div class="acciones">
         @if (!auth.session()) {
-            <a routerLink="/registro" class="btn">Registrar</a>
-            <a routerLink="/login" class="btn">Login</a>
-        } @else if (auth.rol() === 'admin') {
-            <a routerLink="/admin" class="btn">Admin</a>
-            <button type="button" [disabled]="cerrandoSesion()" (click)="cerrarSesion()">
-                @if (cerrandoSesion()) { <app-spinner [inline]="true" /> }
-                Cerrar sesión
-            </button>
+            <a routerLink="/registro" routerLinkActive="activo" class="btn">Registrar</a>
+            <a routerLink="/login" routerLinkActive="activo" class="btn">Login</a>
         } @else {
-            <a routerLink="/perfil" class="btn">Perfil</a>
+            <a *appSiRol="'admin'" routerLink="/admin" routerLinkActive="activo" class="btn">Admin</a>
+            <a *appSiRol="['cliente', 'empleado']" routerLink="/perfil" routerLinkActive="activo" class="btn">Perfil</a>
             <button type="button" [disabled]="cerrandoSesion()" (click)="cerrarSesion()">
                 @if (cerrandoSesion()) { <app-spinner [inline]="true" /> }
                 Cerrar sesión

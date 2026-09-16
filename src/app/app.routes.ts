@@ -40,8 +40,7 @@ export const routes: Routes = [
   },
   {
     path: 'admin',
-    canActivate: [adminGuard],
-    canActivateChild: [adminGuard],
+    canMatch: [adminGuard],
     children: [
       {
         path: '',

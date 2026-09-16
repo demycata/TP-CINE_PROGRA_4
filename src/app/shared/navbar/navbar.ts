@@ -1,10 +1,11 @@
 import { Component, signal } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { Auth } from '../../core/auth/auth';
 import { SpinnerComponent } from '../spinner.component/spinner.component';
+import { SiRolDirective } from '../si-rol.directive';
 
 @Component({
-  imports: [RouterLink, SpinnerComponent],
+  imports: [RouterLink, RouterLinkActive, SpinnerComponent, SiRolDirective],
   selector: 'app-navbar',
   styleUrl: './navbar.css',
   templateUrl: './navbar.html',
