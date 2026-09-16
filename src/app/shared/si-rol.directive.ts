@@ -1,6 +1,6 @@
 import { Directive, Input, TemplateRef, ViewContainerRef, effect, inject } from '@angular/core';
 import { Auth } from '../core/auth/auth';
-import { Rol } from '../services/usuario.service';
+import { Rol } from '../models/usuario.model';
 
 @Directive({
   selector: '[appSiRol]',

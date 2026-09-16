@@ -1,21 +1,17 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { Pelicula, PeliculaService } from '../../../services/pelicula.service';
-import { FuncionConSala, FuncionService } from '../../../services/funcion.service';
-import { Butaca, ButacaService } from '../../../services/butaca.service';
+import { PeliculaService } from '../../../services/pelicula.service';
+import { FuncionService } from '../../../services/funcion.service';
+import { ButacaService } from '../../../services/butaca.service';
 import { EntradaService } from '../../../services/entrada.service';
 import { SpinnerComponent } from '../../../shared/spinner.component/spinner.component';
+import { Pelicula } from '../../../models/pelicula.model';
+import { FuncionConSala } from '../../../models/funcion.model';
+import { Butaca, FilaButacas } from '../../../models/butaca.model';
 
 const FILAS_NORMALES = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'L', 'M', 'N', 'O', 'P', 'Q'];
 const FILAS_VIP = ['R', 'S', 'T'];
 const ORDEN_FILAS = [...FILAS_NORMALES.slice(0, 9), 'J', ...FILAS_NORMALES.slice(9), ...FILAS_VIP];
-
-interface FilaButacas {
-  fila: string;
-  izquierda: Butaca[];
-  centro: Butaca[];
-  derecha: Butaca[];
-}
 
 @Component({
   imports: [RouterLink, SpinnerComponent],
@@ -27,7 +23,7 @@ export class ButacaSeleccionComponent implements OnInit {
   protected pelicula = signal<Pelicula | null>(null);
   protected funcion = signal<FuncionConSala | null>(null);
   protected filas = signal<FilaButacas[]>([]);
-  protected ocupadas = signal<Set<string>>(new Set());
+  protected ocupadas = signal<Set<string>>(new Set());//crea una colección de valores únicos
   protected butacaSeleccionada = signal<Butaca | null>(null);
   protected generandoPdf = signal(false);
   protected cargando = signal(true);

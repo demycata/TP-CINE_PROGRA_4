@@ -2,19 +2,7 @@ import { Component, OnInit, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { FuncionService } from '../../../../services/funcion.service';
 import { SpinnerComponent } from '../../../../shared/spinner.component/spinner.component';
-
-interface FilaFuncion {
-  id: string;
-  fecha: string;
-  hora_inicio: string;
-  hora_fin: string;
-  formato: string;
-  idioma: string;
-  precio_base: number;
-  precio_preventa: number | null;
-  peliculas: { titulo: string } | null;
-  salas: { nombre: string } | null;
-}
+import { FilaFuncion } from '../../../../models/funcion.model';
 
 @Component({
   imports: [RouterLink, SpinnerComponent],

@@ -1,16 +1,10 @@
 import { Service, inject } from '@angular/core';
 import { SupabaseService } from '../core/supabase/supabase.service';
+import { ButacaAInsertar } from '../models/butaca.model';
 
 //antes esto lo hacía un trigger (generar_butacas_sala) en supabase, se pasó a TS para no depender de una función en la base
 const FILAS_NORMALES = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'L', 'M', 'N', 'O', 'P', 'Q']; //15 filas de 28 butacas (4+20+4)
 const FILAS_VIP = ['R', 'S', 'T']; //últimas 3 filas, 28 butacas cada una pero tipo vip
-
-interface ButacaAInsertar {
-    sala_id: string;
-    fila: string;
-    columna: number;
-    tipo_butaca: 'normal' | 'accesible' | 'vip';
-}
 
 @Service()
 export class SalaService {

@@ -1,14 +1,8 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { UsuarioService, Rol } from '../../../../services/usuario.service';
+import { UsuarioService } from '../../../../services/usuario.service';
 import { SpinnerComponent } from '../../../../shared/spinner.component/spinner.component';
-
-interface FilaUsuario {
-  id: string;
-  nombre: string;
-  apellido: string;
-  rol: Rol;
-}
+import { Rol, FilaUsuario } from '../../../../models/usuario.model';
 
 @Component({
   imports: [RouterLink, SpinnerComponent],

@@ -2,15 +2,7 @@ import { Component, OnInit, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ProductoService } from '../../../../services/producto.service';
 import { SpinnerComponent } from '../../../../shared/spinner.component/spinner.component';
-
-interface FilaProducto {
-  id: string;
-  nombre: string;
-  precio: number;
-  activo: boolean;
-  imagen_url: string | null;
-  categorias_producto: { nombre: string } | null;
-}
+import { FilaProducto } from '../../../../models/producto.model';
 
 @Component({
   imports: [RouterLink, SpinnerComponent],

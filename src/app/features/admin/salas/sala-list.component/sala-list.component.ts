@@ -2,13 +2,9 @@ import { Component, OnInit, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { SalaService } from '../../../../services/sala.service';
 import { SpinnerComponent } from '../../../../shared/spinner.component/spinner.component';
+import { FilaSala } from '../../../../models/sala.model';
 
 const TIENE_ENTRADAS_VENDIDAS = '23503';
-
-interface FilaSala {
-  id: string;
-  nombre: string;
-}
 
 @Component({
   imports: [RouterLink, SpinnerComponent],

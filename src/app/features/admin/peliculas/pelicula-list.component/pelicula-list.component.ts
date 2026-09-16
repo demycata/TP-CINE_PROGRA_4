@@ -2,16 +2,7 @@ import { Component, OnInit, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { PeliculaService } from '../../../../services/pelicula.service';
 import { SpinnerComponent } from '../../../../shared/spinner.component/spinner.component';
-
-
-//usamos esta interface y no la de pelicula.service.ts porque no necesitamos todos los campos de la película, solo los que vamos a mostrar en la lista
-interface FilaPelicula {
-  id: string;
-  titulo: string;
-  duracion_minutos: number;
-  activa: boolean;
-  fecha_estreno: string | null;
-}
+import { FilaPelicula } from '../../../../models/pelicula.model';
 
 @Component({
   imports: [RouterLink, SpinnerComponent],

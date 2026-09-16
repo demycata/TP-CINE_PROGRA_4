@@ -1,8 +1,10 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { Pelicula, PeliculaService } from '../../../services/pelicula.service';
-import { FuncionConSala, FuncionService } from '../../../services/funcion.service';
+import { PeliculaService } from '../../../services/pelicula.service';
+import { FuncionService } from '../../../services/funcion.service';
 import { SpinnerComponent } from '../../../shared/spinner.component/spinner.component';
+import { Pelicula } from '../../../models/pelicula.model';
+import { FuncionConSala } from '../../../models/funcion.model';
 
 @Component({
   imports: [RouterLink, SpinnerComponent],

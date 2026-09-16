@@ -1,16 +1,8 @@
 import { Service, inject, signal } from '@angular/core';
 import { Session } from '@supabase/supabase-js';
 import { SupabaseService } from '../supabase/supabase.service';
-import { Rol } from '../../services/usuario.service';
-
-export interface DatosRegistro {
-    nombre: string;
-    apellido: string;
-    fecha_nacimiento: string;
-    tipo_sangre: string;
-    color_ojos: string;
-    dias_vacaciones_anio: number;
-}
+import { Rol } from '../../models/usuario.model';
+import { DatosRegistro } from '../../models/auth.model';
 
 @Service()
 export class Auth {

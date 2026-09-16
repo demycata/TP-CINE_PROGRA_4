@@ -1,7 +1,8 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { Auth } from '../../../core/auth/auth';
-import { Pelicula, PeliculaService } from '../../../services/pelicula.service';
+import { PeliculaService } from '../../../services/pelicula.service';
+import { Pelicula } from '../../../models/pelicula.model';
 import { HoverScaleDirective } from '../../../shared/hover-scale.directive';
 import { SpinnerComponent } from '../../../shared/spinner.component/spinner.component';
 

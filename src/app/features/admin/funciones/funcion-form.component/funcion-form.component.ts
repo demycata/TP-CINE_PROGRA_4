@@ -4,11 +4,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FuncionService } from '../../../../services/funcion.service';
 import { PeliculaService } from '../../../../services/pelicula.service';
 import { SpinnerComponent } from '../../../../shared/spinner.component/spinner.component';
-
-interface PeliculaOpcion {
-  id: string;
-  titulo: string;
-}
+import { PeliculaOpcion } from '../../../../models/pelicula.model';
 
 @Component({
   imports: [ReactiveFormsModule, RouterLink, SpinnerComponent],

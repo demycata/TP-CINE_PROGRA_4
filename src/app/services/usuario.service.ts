@@ -1,7 +1,6 @@
 import { Service, inject } from '@angular/core';
 import { SupabaseService } from '../core/supabase/supabase.service';
-
-export type Rol = 'cliente' | 'empleado' | 'admin';
+import { Rol } from '../models/usuario.model';
 
 @Service()
 export class UsuarioService {

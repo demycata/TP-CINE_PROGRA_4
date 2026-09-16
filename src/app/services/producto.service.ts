@@ -1,13 +1,6 @@
 import { Service, inject } from '@angular/core';
 import { SupabaseService } from '../core/supabase/supabase.service';
-
-export interface ProductoInput {
-    nombre: string;
-    categoria_id: string | null;
-    precio: number;
-    imagen_url: string | null;
-    activo: boolean;
-}
+import { ProductoInput } from '../models/producto.model';
 
 @Service()
 export class ProductoService {

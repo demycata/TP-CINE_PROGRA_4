@@ -1,13 +1,9 @@
 import { Service, inject } from '@angular/core';
 import { SupabaseService } from '../core/supabase/supabase.service';
 import { Auth } from '../core/auth/auth';
+import { EntradaComprada } from '../models/entrada.model';
 
 const BUTACA_OCUPADA = '23505';//codigo de supabase para violacion de constraint de unicidad
-
-export interface EntradaComprada {
-    orden: { id: string; qr_code: string };
-    entrada: { id: string; funcion_id: string; butaca_id: string; precio: number };
-}
 
 @Service()
 export class EntradaService {
@@ -18,7 +14,7 @@ export class EntradaService {
         return this.supabase.client.from('entradas').select('butaca_id').eq('funcion_id', funcionId);
     }
 
-    //antes esto era una función de supabase (comprar_entrada, RPC con security definer), se pasó a dos inserts en TS.
+
     //el UNIQUE(funcion_id, butaca_id) de la tabla entradas sigue siendo el que de verdad evita que se venda dos veces la misma butaca:
     //si dos compras llegan al mismo tiempo, las dos pasan el chequeo de "está libre" en el front, pero solo una gana el insert.
     async comprar(funcionId: string, butacaId: string, precio: number): Promise<{ data: EntradaComprada | null; error: { message: string } | null }> {

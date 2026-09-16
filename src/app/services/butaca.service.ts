@@ -1,13 +1,6 @@
 import { Service, inject } from '@angular/core';
 import { SupabaseService } from '../core/supabase/supabase.service';
 
-export interface Butaca {
-    id: string;
-    fila: string;
-    columna: number;
-    tipo_butaca: 'normal' | 'accesible' | 'vip';
-}
-
 @Service()
 export class ButacaService {
     private supabase = inject(SupabaseService);
