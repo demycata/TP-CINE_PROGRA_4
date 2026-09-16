@@ -76,17 +76,12 @@ npm install
 npm start        # ng serve, http://localhost:4200
 ```
 
-La app apunta al proyecto de Supabase configurado en `src/environments/environments.ts` (id `larqmdlbkbhuljhtkjvt`, región us-east-2) — no hace falta ningún `.env` adicional para desarrollo local.
-
-```bash
-npm run build     # build de producción en dist/tp-cine/browser
-npm test          # unit tests con Vitest
 ```
 
 ## Estado actual
 
 **Implementado**: login/registro, guard de admin, panel de administración con CRUD de películas (+ géneros multi-select desde tabla `generos`, activar/desactivar), géneros (alta), salas (alta simple con generación automática de butacas), funciones (alta/edición con asignación automática de sala), categorías de producto, productos, listado de usuarios con cambio de rol, home pública con listado de películas y destacadas, detalle de película con selección de función, selección de butacas (mapa real de la sala, ocupadas marcadas) y compra con generación de PDF + QR.
 
-**Pendiente**: reseñas, cupones, puntos de fidelización, candy bar y combos, "Mis entradas" y "Mis películas", validación de QR por empleados, reportes y log de actividad del admin, PWA, y llevar la selección de butacas a tiempo real de verdad (hoy se listan las ocupadas al cargar la pantalla; el `UNIQUE` de la base evita la doble venta pero no hay push en vivo entre usuarios que están mirando la misma función).
+**Pendiente**: reseñas, cupones, puntos de fidelización, candy bar y combos, "Mis entradas" y "Mis películas", validación de QR por empleados, reportes y log de actividad del admin.
 
-Detalle de decisiones y alcance priorizado (MoSCoW) en `Seguimiento interno - TP Cine (no entregable).md` (uso interno, no forma parte del entregable).
+
