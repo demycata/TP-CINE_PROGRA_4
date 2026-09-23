@@ -35,6 +35,7 @@ export class FuncionFormComponent implements OnInit {
     formato: new FormControl<'2D' | '3D' | '4D' | '5D'>('2D', Validators.required), //lo que esta entre <> es el tipo de dato que va a tener el formControl
     idioma: new FormControl<'castellano' | 'subtitulada'>('castellano', Validators.required),
     precio_base: new FormControl<number | null>(null, [Validators.required, Validators.min(0.01)]),
+    precio_vip: new FormControl<number | null>(null, [Validators.required, Validators.min(0.01)]),
     precio_preventa: new FormControl<number | null>(null),
     fecha_fin_preventa: new FormControl(''),
   });
@@ -72,6 +73,7 @@ export class FuncionFormComponent implements OnInit {
         formato: funcion.formato,
         idioma: funcion.idioma,
         precio_base: funcion.precio_base,
+        precio_vip: funcion.precio_vip,
         precio_preventa: funcion.precio_preventa,
         fecha_fin_preventa: funcion.fecha_fin_preventa ?? '',
       });
@@ -90,6 +92,11 @@ export class FuncionFormComponent implements OnInit {
     const valores = this.formFuncion.value;
     const precio_preventa = valores.precio_preventa != null ? Number(valores.precio_preventa) : null;//si el precio de preventa es null, lo dejamos como null. Si no, lo convertimos a número.
 
+    if (Number(valores.precio_vip) <= Number(valores.precio_base)) {
+      this.error.set('El precio VIP tiene que ser mayor al precio base.');
+      return;
+    }
+
     const datos = {
       pelicula_id: valores.pelicula_id!,
       fecha: valores.fecha!,
@@ -97,6 +104,7 @@ export class FuncionFormComponent implements OnInit {
       formato: valores.formato!,
       idioma: valores.idioma!,
       precio_base: Number(valores.precio_base),
+      precio_vip: Number(valores.precio_vip),
       precio_preventa,
       // La fecha de cierre de preventa solo tiene sentido si hay precio de preventa.
       fecha_fin_preventa: precio_preventa != null ? valores.fecha_fin_preventa || null : null,

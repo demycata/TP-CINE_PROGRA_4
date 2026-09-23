@@ -10,6 +10,8 @@ export class Auth {
 
     session = signal<Session | null>(null);
     rol = signal<Rol | null>(null);
+    fechaNacimiento = signal<string | null>(null);
+    creditosDisponibles = signal(0);
     listo: Promise<void>;
 
     constructor() {
@@ -25,25 +27,35 @@ export class Auth {
     }
 
 
-    //carga el rol del usuario actual desde la base de datos (lo hace en el constructor y cada vez que cambia la sesion)
-    private async cargarRol() {
+    //carga el rol del usuario actual desde la base de datos (lo hace en el constructor, cada vez que cambia la sesion,
+    //y se puede volver a llamar a mano para refrescar el crédito después de una compra o cancelación)
+    async cargarRol() {
         const usuario = this.session()?.user;
         if (!usuario) {
             this.rol.set(null);
+            this.fechaNacimiento.set(null);
+            this.creditosDisponibles.set(0);
             return;
         }
         //verificar si el usuario tiene un rol en la base de datos
         const { data } = await this.supabase.client
             .from('profiles')
-            .select('rol')
+            .select('rol, fecha_nacimiento, creditos_disponibles')
             .eq('id', usuario.id)
             .single();
         //si tiene rol, guardarlo en la señal, si no, pone en null
         this.rol.set(data?.rol ?? null);
+        this.fechaNacimiento.set(data?.fecha_nacimiento ?? null);
+        this.creditosDisponibles.set(data?.creditos_disponibles ?? 0);
     }
 
-    login(email: string, password: string) {
-        return this.supabase.client.auth.signInWithPassword({ email, password });
+    async login(email: string, password: string) {
+        const resultado = await this.supabase.client.auth.signInWithPassword({ email, password });
+        if (!resultado.error) {
+            this.session.set(resultado.data.session);
+            await this.cargarRol();
+        }
+        return resultado;
     }
 
     async registrar(email: string, password: string, datos: DatosRegistro) {
@@ -55,6 +67,9 @@ export class Auth {
                     nombre: datos.nombre,
                     apellido: datos.apellido,
                     fecha_nacimiento: datos.fecha_nacimiento,
+                    tipo_sangre: datos.tipo_sangre,
+                    color_ojos: datos.color_ojos,
+                    dias_vacaciones_anio: datos.dias_vacaciones_anio,
                 },
             },
         });

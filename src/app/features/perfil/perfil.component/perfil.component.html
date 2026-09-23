@@ -1,3 +1,74 @@
 <h1>Mi perfil</h1>
-<p>Próximamente.</p>
+
+@if (!cargando() && creditoDisponible() > 0) {
+    <section class="credito">
+        <span>Crédito disponible</span>
+        <strong>${{ creditoDisponible() }}</strong>
+    </section>
+}
+
+<section class="mis-entradas">
+    <h2>Mis entradas</h2>
+
+    @if (cargando()) {
+        <app-spinner />
+    } @else if (ordenes().length === 0) {
+        <p class="vacio">Todavía no compraste ninguna entrada.</p>
+    } @else {
+        <div class="lista">
+            @for (orden of ordenes(); track orden.id) {
+                <div class="orden">
+                    <div class="orden-info">
+                        <p class="titulo">{{ orden.entradas[0].funciones?.peliculas?.titulo }}</p>
+                        <p class="meta">
+                            {{ orden.entradas[0].funciones?.fecha }} {{ orden.entradas[0].funciones?.hora_inicio?.slice(0, 5) }}
+                            · Sala {{ orden.entradas[0].funciones?.salas?.nombre }}
+                            · {{ orden.entradas[0].funciones?.formato }} {{ orden.entradas[0].funciones?.idioma }}
+                        </p>
+                        <p class="meta">
+                            Butacas: {{ butacasTexto(orden) }}
+                        </p>
+                        <p class="meta">Total: ${{ orden.total }}</p>
+                    </div>
+
+                    <div class="orden-acciones">
+                        <span class="estado" [class.cancelada]="orden.estado === 'cancelada'">{{ orden.estado }}</span>
+                        @if (puedeCancelar(orden)) {
+                            <button type="button" [disabled]="cancelando() === orden.id" (click)="cancelar(orden)">
+                                @if (cancelando() === orden.id) { <app-spinner [inline]="true" /> }
+                                Cancelar
+                            </button>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</section>
+
+<section class="mis-peliculas">
+    <h2>Mis películas</h2>
+
+    @if (cargando()) {
+        <app-spinner />
+    } @else if (peliculasVistas().length === 0) {
+        <p class="vacio">Todavía no viste ninguna película.</p>
+    } @else {
+        <div class="grid-peliculas">
+            @for (peli of peliculasVistas(); track peli.id) {
+                <a class="card-pelicula" [routerLink]="['/peliculas', peli.id]">
+                    <div class="poster"><img [src]="peli.imagen_url" [alt]="peli.titulo"></div>
+                    <p class="titulo">{{ peli.titulo }}</p>
+                    <p class="meta">{{ peli.fecha }}</p>
+                    @if (peli.calificacion) {
+                        <p class="calificacion">{{ estrellasTexto(peli.calificacion) }}</p>
+                    } @else {
+                        <p class="calificacion sin-calificar">Sin calificar todavía</p>
+                    }
+                </a>
+            }
+        </div>
+    }
+</section>
+
 <a routerLink="/">Volver al inicio</a>

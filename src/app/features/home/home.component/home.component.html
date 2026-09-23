@@ -2,49 +2,106 @@
 @if (cargando()) {
     <app-spinner />
 } @else {
-<section class="banners">
-    <div class="banner"></div>
-    <div class="banner"></div>
-    <div class="banner"></div>
+@if (proximamente().length > 0) {
+<section class="proximamente">
+    <div class="grid-proximamente">
+        @for (peli of proximamente(); track peli.id) {
+            <div class="card-proximamente">
+                <div class="poster">
+                    <img [src]="peli.imagen_url" [alt]="peli.titulo">
+                    @if (rating(peli.id!); as valor) {
+                        <span class="badge-rating">{{ valor }}</span>
+                    }
+                </div>
+                <div class="info">
+                    <span class="estreno">{{ estrenoTexto(peli.fecha_estreno!) }}</span>
+                    <p class="titulo">{{ peli.titulo }}</p>
+                    <p class="meta">{{ metaLine(peli) }}</p>
+                    <button
+                        type="button"
+                        class="btn-avisarme"
+                        [disabled]="tieneAlerta(peli.id!)"
+                        (click)="avisarme(peli.id!)"
+                    >{{ tieneAlerta(peli.id!) ? 'Te vamos a avisar' : 'Avisarme' }}</button>
+                </div>
+            </div>
+        }
+    </div>
 </section>
+}
 
-<section>
-    <h2>Más vistas</h2>
-    <div class="grid">
-        @for (peli of masVistas(); track $index) {
+<section class="mas-vendidas">
+    <h1>Las más vendidas de la semana</h1>
+    <div class="grid grid-top">
+        @for (peli of masVistas(); track peli.id; let i = $index) {
             <a class="card" appHoverScale [routerLink]="['/peliculas', peli.id]">
-                <div class="poster"><img [src]="peli.imagen_url" [alt]="peli.titulo"></div>
+                <div class="poster">
+                    <img [src]="peli.imagen_url" [alt]="peli.titulo">
+                    <span class="rank">{{ i + 1 }}</span>
+                    @if (rating(peli.id!); as valor) {
+                        <span class="badge-rating">{{ valor }}</span>
+                    }
+                </div>
                 <p class="titulo">{{ peli.titulo }}</p>
-                <p class="generos">{{ peli.generos?.join(', ') }}</p>
+                <p class="meta">{{ metaLine(peli) }}</p>
             </a>
         }
     </div>
 </section>
 
-<section>
-    <h2>Próximos Lanzamientos</h2>
+<section class="cartelera">
+    <div class="cartelera-header">
+        <div>
+            <h2>Cartelera</h2>
+            <p class="contador">{{ peliculasFiltradas().length }} de {{ cartelera().length }} películas en cartelera</p>
+        </div>
+        <div class="buscador-caja">
+            <span class="icono-buscar">⌕</span>
+            <input
+                type="text"
+                placeholder="Buscar por título"
+                [value]="busqueda()"
+                (input)="onBuscar($any($event.target).value)"
+            >
+        </div>
+    </div>
+
+    <div class="filtros">
+        <span class="etiqueta-genero">Género</span>
+        @for (genero of generosDisponibles(); track genero) {
+            <button
+                type="button"
+                class="chip"
+                [class.activo]="generosSeleccionados().includes(genero)"
+                (click)="toggleGenero(genero)"
+            >{{ genero }}</button>
+        }
+        <div class="flex-1"></div>
+        @if (hasFiltros()) {
+            <button type="button" class="limpiar" (click)="limpiarFiltros()">Limpiar filtros ✕</button>
+        }
+    </div>
+
     <div class="grid">
-        @for (item of peliculas(); track $index) {
+        @for (item of peliculasFiltradas(); track item.id) {
             <a class="card" appHoverScale [routerLink]="['/peliculas', item.id]">
-                <div class="poster"><img [src]="item.imagen_url" [alt]="item.titulo"></div>
+                <div class="poster">
+                    <img [src]="item.imagen_url" [alt]="item.titulo">
+                    @if (rating(item.id!); as valor) {
+                        <span class="badge-rating">{{ valor }}</span>
+                    }
+                </div>
                 <p class="titulo">{{ item.titulo }}</p>
-                <p class="generos">{{ item.generos?.join(', ') }}</p>
+                <p class="meta">{{ metaLine(item) }}</p>
             </a>
         }
     </div>
-</section>
 
-<section>
-    <h2>Anime</h2>
-    <div class="grid">
-        @for (item of peliculas(); track $index) {
-            @if (item.generos?.includes('Anime')) {
-            <a class="card" appHoverScale [routerLink]="['/peliculas', item.id]">
-                <div class="poster"><img [src]="item.imagen_url" [alt]="item.titulo"></div>
-                <p class="titulo">{{ item.titulo }}</p>
-                <p class="generos">{{ item.generos?.join(', ') }}</p>
-            </a>
-        }}
-    </div>
+    @if (peliculasFiltradas().length === 0) {
+        <div class="sin-resultados">
+            Ninguna película coincide con la búsqueda.
+            <button type="button" (click)="limpiarFiltros()">Ver toda la cartelera</button>
+        </div>
+    }
 </section>
 }

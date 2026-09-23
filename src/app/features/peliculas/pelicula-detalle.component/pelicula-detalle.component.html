@@ -1,52 +1,182 @@
-<a routerLink="/" class="volver">← Volver</a>
+<a routerLink="/" class="volver">← Volver a la cartelera</a>
 
 @if (cargando()) {
   <app-spinner />
 } @else if (pelicula(); as peli) {
   <div class="detalle">
-    <div class="poster"><img [src]="peli.imagen_url" [alt]="peli.titulo"></div>
+    <div class="poster-col">
+      <div class="poster"><img [src]="peli.imagen_url" [alt]="peli.titulo"></div>
+
+      <div class="ficha">
+        <div class="fila"><span>Duración</span><span>{{ peli.duracion_minutos }} min</span></div>
+        <div class="fila"><span>Clasificación</span><span>{{ peli.restriccion_edad ? '+' + peli.restriccion_edad : 'ATP' }}</span></div>
+        @if (peli.fecha_estreno) {
+          <div class="fila"><span>Estreno</span><span>{{ estrenoTexto(peli.fecha_estreno) }}</span></div>
+        }
+      </div>
+    </div>
 
     <div class="info">
       <h1>{{ peli.titulo }}</h1>
-      <p class="generos">{{ peli.generos?.join(', ') }}</p>
-      <p class="meta">
-        {{ peli.duracion_minutos }} min
-        @if (peli.restriccion_edad) {
-          <span class="restriccion">+{{ peli.restriccion_edad }}</span>
-        }
-      </p>
-      <p class="sinopsis">{{ peli.sinopsis }}</p>
-    </div>
-  </div>
 
-  <section class="funciones">
-    <h2>Funciones</h2>
-
-    @if (funciones().length === 0) {
-      <p class="vacio">No hay funciones programadas todavía.</p>
-    } @else {
-      <div class="lista-funciones">
-        @for (funcion of funciones(); track funcion.id) {
-          <button
-            type="button"
-            class="funcion"
-            [class.seleccionada]="funcionSeleccionada()?.id === funcion.id"
-            (click)="seleccionarFuncion(funcion)"
-          >
-            <span class="fecha">{{ funcion.fecha }}</span>
-            <span class="hora">{{ funcion.hora_inicio }}</span>
-            <span class="sala">{{ funcion.salas?.nombre }}</span>
-            <span class="formato">{{ funcion.formato }} · {{ funcion.idioma }}</span>
-            <span class="precio">${{ funcion.precio_base }}</span>
-          </button>
+      <div class="rating-bar">
+        <div class="rating-numero">
+          <span class="numero">{{ promedio().toFixed(1) }}</span>
+          <span class="sobre">/ 5</span>
+        </div>
+        <div class="rating-detalle">
+          <div class="estrellas">{{ estrellasTexto(promedio()) }}</div>
+          <div class="cantidad">{{ resenas().length }} {{ resenas().length === 1 ? 'reseña' : 'reseñas' }}</div>
+        </div>
+        <div class="separador"></div>
+        <span class="meta-linea">{{ metaLine(peli) }}</span>
+        <div class="flex-1"></div>
+        @if (funciones().length > 0) {
+          <button type="button" class="btn-ver-funciones" (click)="scrollAFunciones()">Ver funciones</button>
         }
       </div>
 
-      @if (funcionSeleccionada(); as elegida) {
-        <button type="button" class="btn-comprar" (click)="irAButacas()">
-          Siguiente — {{ elegida.fecha }} {{ elegida.hora_inicio.slice(0, 5) }}
-        </button>
+      @if (peli.sinopsis) {
+        <p class="sinopsis">{{ peli.sinopsis }}</p>
       }
-    }
-  </section>
+
+      @if (funciones().length > 0) {
+        <div class="specs-grid">
+          <div class="spec-card">
+            <div class="spec-titulo">Formatos disponibles</div>
+            <div class="chips">
+              @for (formato of formatosDisponibles(); track formato) {
+                <span class="chip">{{ formato }}</span>
+              }
+            </div>
+          </div>
+          <div class="spec-card">
+            <div class="spec-titulo">Idiomas</div>
+            <div class="chips">
+              @for (idioma of idiomasDisponibles(); track idioma) {
+                <span class="chip">{{ idioma }}</span>
+              }
+            </div>
+          </div>
+        </div>
+      }
+
+      <section id="funciones" class="funciones">
+        <h2>Funciones</h2>
+
+        @if (funciones().length === 0) {
+          <p class="vacio">No hay funciones programadas todavía.</p>
+        } @else {
+          <div class="dias">
+            @for (dia of dias(); track dia) {
+              <button
+                type="button"
+                class="dia"
+                [class.activo]="dia === diaSeleccionado()"
+                (click)="seleccionarDia(dia)"
+              >
+                <span class="dia-semana">{{ diaSemana(dia) }}</span>
+                <span class="dia-numero">{{ diaNumero(dia) }}</span>
+              </button>
+            }
+          </div>
+
+          <div class="grupos-sala">
+            @for (grupo of gruposSala(); track grupo.sala + grupo.formato + grupo.idioma) {
+              <div class="grupo">
+                <div class="grupo-info">
+                  <span class="grupo-sala">{{ grupo.sala }}</span>
+                  <span class="grupo-spec">{{ grupo.formato }} · {{ grupo.idioma }}</span>
+                </div>
+                <div class="horarios">
+                  @for (funcion of grupo.funciones; track funcion.id) {
+                    <button
+                      type="button"
+                      class="horario"
+                      [class.seleccionado]="funcionSeleccionada()?.id === funcion.id"
+                      (click)="seleccionarFuncion(funcion)"
+                    >
+                      <span class="hora">{{ funcion.hora_inicio.slice(0, 5) }}</span>
+                      @if (enPreventa(funcion)) {
+                        <span class="tag-preventa">Preventa</span>
+                      }
+                      <span class="precio">${{ precioVigente(funcion) }}</span>
+                    </button>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </section>
+
+      <section class="resenas">
+        <h2>Reseñas</h2>
+
+        @if (auth.session()) {
+          <div class="mi-resena">
+            <p class="etiqueta">{{ miResenaId() ? 'Tu reseña' : 'Dejá tu reseña' }}</p>
+
+            <div class="selector-estrellas">
+              @for (n of [1, 2, 3, 4, 5]; track n) {
+                <button type="button" class="estrella" [class.activa]="n <= estrellasElegidas()" (click)="seleccionarEstrellas(n)">★</button>
+              }
+            </div>
+
+            <textarea
+              placeholder="Comentario (opcional)"
+              [value]="comentario()"
+              (input)="onComentarioInput($any($event.target).value)"
+            ></textarea>
+
+            @if (errorResena()) {
+              <small class="error">{{ errorResena() }}</small>
+            }
+
+            <button type="button" class="btn-guardar-resena" [disabled]="guardandoResena()" (click)="guardarResena()">
+              @if (guardandoResena()) { <app-spinner [inline]="true" /> }
+              {{ miResenaId() ? 'Actualizar reseña' : 'Publicar reseña' }}
+            </button>
+          </div>
+        } @else {
+          <p class="ayuda"><a routerLink="/login">Iniciá sesión</a> para dejar tu reseña.</p>
+        }
+
+        @if (resenas().length === 0) {
+          <p class="vacio">Todavía no hay reseñas para esta película.</p>
+        } @else {
+          <div class="resenas-grid">
+            <div class="resumen-estrellas">
+              <div class="numero-grande">{{ promedio().toFixed(1) }}</div>
+              <div class="estrellas">{{ estrellasTexto(promedio()) }}</div>
+
+              @for (fila of histograma(); track fila.estrellas) {
+                <div class="fila-histograma">
+                  <span class="num-estrella">{{ fila.estrellas }}</span>
+                  <div class="barra"><div class="relleno" [style.width.%]="fila.pct"></div></div>
+                  <span class="pct">{{ fila.pct }}%</span>
+                </div>
+              }
+            </div>
+
+            <ul class="lista-resenas">
+              @for (r of resenas(); track r.id) {
+                <li>
+                  <div class="cabecera">
+                    <div class="avatar">{{ iniciales(r.autor) }}</div>
+                    <span class="autor">{{ r.autor }}</span>
+                    <div class="flex-1"></div>
+                    <span class="estrellas">{{ estrellasTexto(r.estrellas) }}</span>
+                  </div>
+                  @if (r.comentario) {
+                    <p class="comentario">{{ r.comentario }}</p>
+                  }
+                </li>
+              }
+            </ul>
+          </div>
+        }
+      </section>
+    </div>
+  </div>
 }

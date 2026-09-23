@@ -7,88 +7,141 @@
     <h1>{{ peli.titulo }}</h1>
     <p class="meta">
       {{ func.fecha }} {{ func.hora_inicio.slice(0, 5) }} · {{ func.salas?.nombre }} · {{ func.formato }} · {{ func.idioma }}
+      @if (enPreventa(func)) {
+        <span class="tag-preventa">Preventa</span>
+      }
     </p>
 
-    <div class="leyenda">
-      <span class="item"><span class="muestra libre"></span> Libre</span>
-      <span class="item"><span class="muestra ocupada"></span> Ocupada</span>
-      <span class="item"><span class="muestra accesible"></span> Accesible</span>
-      <span class="item"><span class="muestra vip"></span> VIP</span>
-      <span class="item"><span class="muestra seleccionada"></span> Seleccionada</span>
-    </div>
-
-    <div class="pantalla">PANTALLA</div>
-
-    <div class="mapa">
-      @for (fila of filas(); track fila.fila) {
-        <div class="fila">
-          <span class="etiqueta-fila">{{ fila.fila }}</span>
-
-          <div class="bloque">
-            @for (butaca of fila.izquierda; track butaca.id) {
-              <button
-                type="button"
-                class="butaca"
-                [class.ocupada]="ocupadas().has(butaca.id)"
-                [class.accesible]="butaca.tipo_butaca === 'accesible'"
-                [class.vip]="butaca.tipo_butaca === 'vip'"
-                [class.seleccionada]="butacaSeleccionada()?.id === butaca.id"
-                [disabled]="ocupadas().has(butaca.id)"
-                (click)="seleccionarButaca(butaca)"
-                [title]="fila.fila + butaca.columna"
-              ></button>
-            }
-          </div>
-
-          <div class="bloque">
-            @for (butaca of fila.centro; track butaca.id) {
-              <button
-                type="button"
-                class="butaca"
-                [class.ocupada]="ocupadas().has(butaca.id)"
-                [class.accesible]="butaca.tipo_butaca === 'accesible'"
-                [class.vip]="butaca.tipo_butaca === 'vip'"
-                [class.seleccionada]="butacaSeleccionada()?.id === butaca.id"
-                [disabled]="ocupadas().has(butaca.id)"
-                (click)="seleccionarButaca(butaca)"
-                [title]="fila.fila + butaca.columna"
-              ></button>
-            }
-          </div>
-
-          <div class="bloque">
-            @for (butaca of fila.derecha; track butaca.id) {
-              <button
-                type="button"
-                class="butaca"
-                [class.ocupada]="ocupadas().has(butaca.id)"
-                [class.accesible]="butaca.tipo_butaca === 'accesible'"
-                [class.vip]="butaca.tipo_butaca === 'vip'"
-                [class.seleccionada]="butacaSeleccionada()?.id === butaca.id"
-                [disabled]="ocupadas().has(butaca.id)"
-                (click)="seleccionarButaca(butaca)"
-                [title]="fila.fila + butaca.columna"
-              ></button>
-            }
-          </div>
+    <div class="layout">
+      <div class="columna-mapa">
+        <div class="leyenda">
+          <span class="item"><span class="muestra libre"></span> Libre</span>
+          <span class="item"><span class="muestra ocupada"></span> Ocupada</span>
+          <span class="item"><span class="muestra accesible"></span> Accesible</span>
+          <span class="item"><span class="muestra vip"></span> VIP</span>
+          <span class="item"><span class="muestra seleccionada"></span> Seleccionada</span>
         </div>
-      }
-    </div>
 
-    <div class="resumen">
-      @if (butacaSeleccionada(); as butaca) {
-        <p>Butaca elegida: <strong>{{ butaca.fila }}{{ butaca.columna }}</strong> — ${{ func.precio_base }}</p>
-        <button type="button" class="btn-comprar" [disabled]="generandoPdf()" (click)="comprar()">
-          @if (generandoPdf()) { <app-spinner [inline]="true" /> }
-          {{ generandoPdf() ? 'Generando...' : 'Comprar' }}
-        </button>
-      } @else {
-        <p class="ayuda">Elegí una butaca libre para continuar.</p>
-      }
+        <div class="pantalla">PANTALLA</div>
 
-      @if (error()) {
-        <p class="error">{{ error() }}</p>
-      }
+        @if (edadInsuficiente()) {
+          <p class="error">{{ error() }}</p>
+        }
+
+        <div class="mapa" [class.deshabilitado]="edadInsuficiente()">
+          @for (fila of filas(); track fila.fila) {
+            <div class="fila">
+              <span class="etiqueta-fila">{{ fila.fila }}</span>
+
+              <div class="bloque">
+                @for (butaca of fila.izquierda; track butaca.id) {
+                  <button
+                    type="button"
+                    class="butaca"
+                    [class.ocupada]="ocupadas().has(butaca.id)"
+                    [class.accesible]="butaca.tipo_butaca === 'accesible'"
+                    [class.vip]="butaca.tipo_butaca === 'vip'"
+                    [class.seleccionada]="estaSeleccionada(butaca)"
+                    [disabled]="ocupadas().has(butaca.id)"
+                    (click)="seleccionarButaca(butaca)"
+                    [title]="fila.fila + butaca.columna"
+                  ></button>
+                }
+              </div>
+
+              <div class="bloque">
+                @for (butaca of fila.centro; track butaca.id) {
+                  <button
+                    type="button"
+                    class="butaca"
+                    [class.ocupada]="ocupadas().has(butaca.id)"
+                    [class.accesible]="butaca.tipo_butaca === 'accesible'"
+                    [class.vip]="butaca.tipo_butaca === 'vip'"
+                    [class.seleccionada]="estaSeleccionada(butaca)"
+                    [disabled]="ocupadas().has(butaca.id)"
+                    (click)="seleccionarButaca(butaca)"
+                    [title]="fila.fila + butaca.columna"
+                  ></button>
+                }
+              </div>
+
+              <div class="bloque">
+                @for (butaca of fila.derecha; track butaca.id) {
+                  <button
+                    type="button"
+                    class="butaca"
+                    [class.ocupada]="ocupadas().has(butaca.id)"
+                    [class.accesible]="butaca.tipo_butaca === 'accesible'"
+                    [class.vip]="butaca.tipo_butaca === 'vip'"
+                    [class.seleccionada]="estaSeleccionada(butaca)"
+                    [disabled]="ocupadas().has(butaca.id)"
+                    (click)="seleccionarButaca(butaca)"
+                    [title]="fila.fila + butaca.columna"
+                  ></button>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+
+      <aside class="resumen-card">
+        <h2>Resumen</h2>
+
+        @if (butacasSeleccionadas().length > 0) {
+          <ul class="butacas-elegidas">
+            @for (b of butacasSeleccionadas(); track b.id) {
+              <li>
+                <span>{{ b.fila }}{{ b.columna }} @if (b.tipo_butaca === 'vip') { <span class="tag-vip">VIP</span> }</span>
+                <span>${{ precioButaca(b, func) }}</span>
+              </li>
+            }
+          </ul>
+
+          <div class="linea">
+            <span>Subtotal</span>
+            <span>${{ total() }}</span>
+          </div>
+
+          @if (creditoDisponible() > 0) {
+            <div class="credito">
+              <div class="credito-titulo">
+                <label for="credito">Usar crédito (disponible: ${{ creditoDisponible() }})</label>
+                <button type="button" class="link-usar-todo" (click)="usarTodoElCredito()">Usar todo</button>
+              </div>
+              <input
+                id="credito"
+                type="number"
+                min="0"
+                [max]="maxCredito()"
+                [value]="creditoAUsar()"
+                (input)="onCreditoInput($any($event.target).value)"
+              >
+            </div>
+
+            <div class="linea">
+              <span>Crédito aplicado</span>
+              <span>-${{ creditoAplicado() }}</span>
+            </div>
+          }
+
+          <div class="linea total">
+            <span>Total</span>
+            <span>${{ totalFinal() }}</span>
+          </div>
+
+          <button type="button" class="btn-comprar" [disabled]="generandoPdf()" (click)="comprar()">
+            @if (generandoPdf()) { <app-spinner [inline]="true" /> }
+            {{ generandoPdf() ? 'Generando...' : 'Comprar' }}
+          </button>
+        } @else if (!edadInsuficiente()) {
+          <p class="ayuda">Elegí hasta 8 butacas libres para continuar.</p>
+        }
+
+        @if (error() && !edadInsuficiente()) {
+          <p class="error">{{ error() }}</p>
+        }
+      </aside>
     </div>
   }
 }

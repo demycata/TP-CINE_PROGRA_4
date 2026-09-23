@@ -32,15 +32,25 @@
     }
 
     <label for="tipo_sangre">Tipo de sangre:</label>
-    <input type="text" id="tipo_sangre" formControlName="tipo_sangre" placeholder="Ej: O+">
+    <select id="tipo_sangre" formControlName="tipo_sangre">
+        <option value="" disabled>Elegí una opción</option>
+        @for (tipo of tiposSangre; track tipo) {
+            <option [value]="tipo">{{ tipo }}</option>
+        }
+    </select>
     @if (formRegistro.controls.tipo_sangre.touched && formRegistro.controls.tipo_sangre.invalid) {
-        <small class="error">Ingresá tu tipo de sangre.</small>
+        <small class="error">Elegí tu tipo de sangre.</small>
     }
 
     <label for="color_ojos">Color de ojos:</label>
-    <input type="text" id="color_ojos" formControlName="color_ojos">
+    <select id="color_ojos" formControlName="color_ojos">
+        <option value="" disabled>Elegí una opción</option>
+        @for (color of coloresOjos; track color) {
+            <option [value]="color">{{ color }}</option>
+        }
+    </select>
     @if (formRegistro.controls.color_ojos.touched && formRegistro.controls.color_ojos.invalid) {
-        <small class="error">Ingresá el color de tus ojos.</small>
+        <small class="error">Elegí el color de tus ojos.</small>
     }
 
     <label for="dias_vacaciones_anio">Días de vacaciones al año:</label>

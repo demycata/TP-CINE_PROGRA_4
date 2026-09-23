@@ -1,1 +1,7 @@
-<span class="spinner" [class.spinner-inline]="inline()"></span>
+@if (inline()) {
+  <span class="spinner spinner-inline"></span>
+} @else {
+  <div class="spinner-centro">
+    <span class="spinner"></span>
+  </div>
+}

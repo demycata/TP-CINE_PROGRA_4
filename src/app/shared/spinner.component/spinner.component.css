@@ -1,8 +1,14 @@
+.spinner-centro {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 70vh;
+}
+
 .spinner {
   display: block;
   width: 2rem;
   height: 2rem;
-  margin: var(--espacio-lg) auto;
   border: 3px solid var(--color-superficie);
   border-top-color: var(--color-primario);
   border-radius: 50%;

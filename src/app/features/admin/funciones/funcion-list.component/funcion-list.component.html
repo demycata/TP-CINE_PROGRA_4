@@ -16,6 +16,7 @@
             <th>Formato</th>
             <th>Idioma</th>
             <th>Precio</th>
+            <th>Precio VIP</th>
             <th></th>
         </tr>
     </thead>
@@ -29,6 +30,7 @@
                 <td>{{ funcion.formato }}</td>
                 <td>{{ funcion.idioma }}</td>
                 <td>{{ funcion.precio_base }}</td>
+                <td>{{ funcion.precio_vip }}</td>
                 <td>
                     <a [routerLink]="['/admin/funciones', funcion.id, 'editar']">Editar</a>
                 </td>

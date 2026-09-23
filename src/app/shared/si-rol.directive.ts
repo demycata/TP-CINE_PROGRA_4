@@ -24,7 +24,7 @@ export class SiRolDirective {
   }
 
   private actualizar() {
-    const rolActual = this.auth.rol();
+    const rolActual = this.auth.rol(); //trae el rol de la session actual
     const debeMostrarse = rolActual !== null && this.rolesPermitidos.includes(rolActual);
 
     if (debeMostrarse && !this.mostrada) {

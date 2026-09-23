@@ -3,6 +3,7 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { Router, RouterLink } from '@angular/router';
 import { Auth } from '../../../../core/auth/auth';
 import { SpinnerComponent } from '../../../../shared/spinner.component/spinner.component';
+import { opcionValidaValidator } from '../../../../shared/opcion-valida.validator';
 
 @Component({
   imports: [ReactiveFormsModule, RouterLink, SpinnerComponent],
@@ -15,6 +16,9 @@ export class Register {
   constructor(private auth: Auth, private router: Router) {
   }
 
+  protected readonly tiposSangre = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
+  protected readonly coloresOjos = ['Marrón', 'Azul', 'Verde', 'Gris', 'Miel', 'Negro'];
+
   enviado = signal(false);
   error = signal<string | null>(null);
 
@@ -24,8 +28,8 @@ export class Register {
     email: new FormControl('', [Validators.required, Validators.email]),
     password: new FormControl('', [Validators.required, Validators.minLength(6)]),
     fecha_nacimiento: new FormControl('', [Validators.required]),
-    tipo_sangre: new FormControl('', [Validators.required]),
-    color_ojos: new FormControl('', [Validators.required]),
+    tipo_sangre: new FormControl('', [Validators.required, opcionValidaValidator(this.tiposSangre)]),
+    color_ojos: new FormControl('', [Validators.required, opcionValidaValidator(this.coloresOjos)]),
     dias_vacaciones_anio: new FormControl(0, [Validators.required, Validators.min(0)]),
   });
 

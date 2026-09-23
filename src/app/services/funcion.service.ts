@@ -2,7 +2,7 @@ import { Service, inject } from '@angular/core';
 import { SupabaseService } from '../core/supabase/supabase.service';
 import { SalaService } from './sala.service';
 import { PeliculaService } from './pelicula.service';
-import { FuncionInput } from '../models/funcion.model';
+import { FuncionConSala, FuncionInput } from '../models/funcion.model';
 
 const SIN_SALA_LIBRE = '23P01'; //codigo de error que devuelve supabase cuando no hay salas libres
 const BUFFER_MINUTOS = 30; //el tiempo que tiene que haber entre funciones
@@ -24,7 +24,7 @@ export class FuncionService {
     obtenerConSala(id: string) {
         return this.supabase.client
             .from('funciones')
-            .select('id, sala_id, fecha, hora_inicio, hora_fin, formato, idioma, precio_base, precio_preventa, fecha_fin_preventa, salas(nombre)')
+            .select('id, sala_id, fecha, hora_inicio, hora_fin, formato, idioma, precio_base, precio_vip, precio_preventa, fecha_fin_preventa, salas(nombre)')
             .eq('id', id)
             .single();
     }
@@ -33,11 +33,21 @@ export class FuncionService {
         const hoy = new Date().toISOString().slice(0, 10);
         return this.supabase.client
             .from('funciones')
-            .select('id, sala_id, fecha, hora_inicio, hora_fin, formato, idioma, precio_base, precio_preventa, fecha_fin_preventa, salas(nombre)')
+            .select('id, sala_id, fecha, hora_inicio, hora_fin, formato, idioma, precio_base, precio_vip, precio_preventa, fecha_fin_preventa, salas(nombre)')
             .eq('pelicula_id', peliculaId)
             .gte('fecha', hoy)
             .order('fecha')
             .order('hora_inicio');
+    }
+
+    //true si hoy todavía está dentro de la ventana de preventa configurada para esa función
+    enPreventa(funcion: Pick<FuncionConSala, 'precio_preventa' | 'fecha_fin_preventa'>): boolean {
+        const hoy = new Date().toISOString().slice(0, 10);
+        return funcion.precio_preventa != null && !!funcion.fecha_fin_preventa && hoy <= funcion.fecha_fin_preventa;
+    }
+
+    precioVigente(funcion: Pick<FuncionConSala, 'precio_base' | 'precio_preventa' | 'fecha_fin_preventa'>): number {
+        return this.enPreventa(funcion) ? funcion.precio_preventa! : funcion.precio_base;
     }
 
     crear(datos: FuncionInput) {//resive la primera interfaz y supa la completa con id, sala_id y hora_fin

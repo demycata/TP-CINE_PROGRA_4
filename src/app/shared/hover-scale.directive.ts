@@ -9,7 +9,7 @@ export class HoverScaleDirective {
 
   @HostListener('mouseenter')
   onMouseEnter() {
-    this.transform = 'scale(1.05)';
+    this.transform = 'scale(1.02)';
   }
 
   @HostListener('mouseleave')

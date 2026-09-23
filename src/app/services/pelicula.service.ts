@@ -13,12 +13,26 @@ export class PeliculaService {
             .order('titulo');
     }
 
+    //excluye las que todavía no se estrenaron (esas van en "Próximamente", no en la cartelera comprable)
     activas() {
+        const hoy = new Date().toISOString().slice(0, 10);
         return this.supabase.client
             .from('peliculas')
             .select('*')
             .eq('activa', true)
+            .or(`fecha_estreno.is.null,fecha_estreno.lte.${hoy}`)
             .order('titulo');
+    }
+
+    proximamente() {
+        const hoy = new Date().toISOString().slice(0, 10);
+        return this.supabase.client
+            .from('peliculas')
+            .select('*')
+            .eq('activa', true)
+            .not('fecha_estreno', 'is', null)
+            .gt('fecha_estreno', hoy)
+            .order('fecha_estreno');
     }
 
     masVistas() {

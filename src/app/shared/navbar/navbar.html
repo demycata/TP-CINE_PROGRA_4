@@ -1,8 +1,11 @@
 <header class="header">
-    <div class="logo">CINE</div>
+    <a routerLink="/" class="logo">
+        <div class="flex items-center">
+            <img src="https://cinehax.com/wp-content/themes/cinehax/assets/logo/logo_oficial.svg" alt="CINE HAX – Películas y Series GRATIS" class="h-6 w-auto -mt-1">
+        </div>
+    </a>
 
-    <input type="search" class="buscador" placeholder="Buscar película...">
-
+    <div class="flex-1"></div>
 
 <!-- manejo de distinos nav segun la session -->
     <div class="acciones">
@@ -12,7 +15,7 @@
         } @else {
             <a *appSiRol="'admin'" routerLink="/admin" routerLinkActive="activo" class="btn">Admin</a>
             <a *appSiRol="['cliente', 'empleado']" routerLink="/perfil" routerLinkActive="activo" class="btn">Perfil</a>
-            <button type="button" [disabled]="cerrandoSesion()" (click)="cerrarSesion()">
+            <button type="button" class="btn" [disabled]="cerrandoSesion()" (click)="cerrarSesion()">
                 @if (cerrandoSesion()) { <app-spinner [inline]="true" /> }
                 Cerrar sesión
             </button>

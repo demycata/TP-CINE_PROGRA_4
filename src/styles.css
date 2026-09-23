@@ -8,6 +8,9 @@
   --color-acento: #ff6b5e;
   --color-texto: #e8e8e6;
   --color-texto-secundario: #a0a4a8;
+  --color-texto-terciario: #6b7076;
+  --color-borde: #262b30;
+  --color-borde-medio: #2a2f34;
 
   /* Tipografía */
   --fuente-base: system-ui, -apple-system, sans-serif;
@@ -32,4 +35,40 @@ body {
   color: var(--color-texto);
   font-family: var(--fuente-base);
   margin: 0;
+}
+
+a {
+  color: var(--color-primario);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--color-primario-hover);
+}
+
+::selection {
+  background: var(--color-primario);
+  color: var(--color-fondo);
+}
+
+input {
+  font-family: inherit;
+}
+
+input::placeholder {
+  color: var(--color-texto-terciario);
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-borde-medio);
+  border-radius: var(--radio-borde);
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-fondo);
 }
