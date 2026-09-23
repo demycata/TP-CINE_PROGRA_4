@@ -1,7 +1,7 @@
 {
-  "name": "TP Cine",
-  "short_name": "TP Cine",
-  "description": "Sistema de venta de entradas para TP Cine",
+  "name": "Cinemax",
+  "short_name": "Cinemax",
+  "description": "Sistema de venta de entradas de Cinemax",
   "display": "standalone",
   "scope": "./",
   "start_url": "./",

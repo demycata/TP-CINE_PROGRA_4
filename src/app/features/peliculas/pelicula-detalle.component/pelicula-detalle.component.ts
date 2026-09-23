@@ -162,9 +162,7 @@ export class PeliculaDetalleComponent implements OnInit {
     return this.funcionService.enPreventa(funcion);
   }
 
-  irAButacas() {
-  this.router.navigate(['/peliculas', this.pelicula()!.id, 'funciones', this.funcionSeleccionada()!.id, 'butacas']);
-  }
+
 
   estrellasTexto(valor: number): string {
     const llenas = Math.round(valor);
