@@ -7,15 +7,15 @@ import { Rol } from '../models/usuario.model';
 })
 export class SiRolDirective {
   private auth = inject(Auth);
-  private templateRef = inject(TemplateRef<unknown>);
-  private viewContainer = inject(ViewContainerRef);
+  private templateRef = inject(TemplateRef<unknown>); // referencia al template que se va a mostrar o ocultar
+  private viewContainer = inject(ViewContainerRef); // referencia al contenedor donde se va a renderizar el template
 
   private rolesPermitidos: Rol[] = [];
   private mostrada = false;
 
   @Input({ required: true })
   set appSiRol(rol: Rol | Rol[]) {
-    this.rolesPermitidos = Array.isArray(rol) ? rol : [rol];
+    this.rolesPermitidos = Array.isArray(rol) ? rol : [rol]; //si es array, lo asigna directamente, si no, lo convierte en array
     this.actualizar();
   }
 
@@ -28,7 +28,7 @@ export class SiRolDirective {
     const debeMostrarse = rolActual !== null && this.rolesPermitidos.includes(rolActual);
 
     if (debeMostrarse && !this.mostrada) {
-      this.viewContainer.createEmbeddedView(this.templateRef);
+      this.viewContainer.createEmbeddedView(this.templateRef); // renderiza el template en el contenedor
       this.mostrada = true;
     } else if (!debeMostrarse && this.mostrada) {
       this.viewContainer.clear();

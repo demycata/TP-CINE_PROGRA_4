@@ -21,7 +21,7 @@ export interface FilaPelicula {
     fecha_estreno: string | null;
 }
 
-export interface PeliculaOpcion {
+export interface PeliculaOpcion {//interface que se usa para mostrar las peliculas en un select al crear o editar una funcion   
     id: string;
     titulo: string;
 }

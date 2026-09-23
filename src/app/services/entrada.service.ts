@@ -78,7 +78,7 @@ export class EntradaService {
     //el insert de varias entradas es una sola sentencia: si una butaca ya fue tomada, Postgres rechaza el insert completo (nada queda a medias).
     async comprar(funcionId: string, butacas: { butacaId: string; precio: number }[], creditoAUsar = 0): Promise<{ data: EntradaComprada | null; error: { message: string } | null }> {
         const usuarioId = this.auth.session()?.user.id ?? null; //compra anónima permitida => null
-        const subtotal = butacas.reduce((suma, b) => suma + b.precio, 0);
+        const subtotal = butacas.reduce((suma, b) => suma + b.precio, 0);//sumamos el preico de tolas las butacas
         const credito = usuarioId ? Math.min(Math.max(creditoAUsar, 0), subtotal) : 0; //el crédito es solo para usuarios registrados
         const total = subtotal - credito;
 
@@ -94,7 +94,7 @@ export class EntradaService {
 
         const { data: entradas, error: errorEntradas } = await this.supabase.client
             .from('entradas')
-            .insert(butacas.map((b) => ({ orden_id: orden.id, funcion_id: funcionId, butaca_id: b.butacaId, precio: b.precio })))
+            .insert(butacas.map((b) => ({ orden_id: orden.id, funcion_id: funcionId, butaca_id: b.butacaId, precio: b.precio })))//por cada butaca elegida, insertamos una fila en entradas con el id de la orden, el id de la función, el id de la butaca y el precio
             .select('id, butaca_id, precio');
 
         if (errorEntradas || !entradas) {

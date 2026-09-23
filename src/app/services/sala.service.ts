@@ -2,7 +2,7 @@ import { Service, inject } from '@angular/core';
 import { SupabaseService } from '../core/supabase/supabase.service';
 import { ButacaAInsertar } from '../models/butaca.model';
 
-//antes esto lo hacía un trigger (generar_butacas_sala) en supabase, se pasó a TS para no depender de una función en la base
+
 const FILAS_NORMALES = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'L', 'M', 'N', 'O', 'P', 'Q']; //15 filas de 28 butacas (4+20+4)
 const FILAS_VIP = ['R', 'S', 'T']; //últimas 3 filas, 28 butacas cada una pero tipo vip
 
@@ -18,7 +18,7 @@ export class SalaService {
     async crear(nombre: string) {
         const { data: sala, error: errorSala } = await this.supabase.client.from('salas').insert({ nombre }).select('id').single();
         if (errorSala || !sala) return { error: errorSala };
-
+        //solo necesitamos el error para verificar
         const { error: errorButacas } = await this.supabase.client.from('butacas').insert(this.generarButacas(sala.id));
         if (errorButacas) {
             //si fallaron las butacas no dejamos la sala a medio armar, sin butacas es inútil

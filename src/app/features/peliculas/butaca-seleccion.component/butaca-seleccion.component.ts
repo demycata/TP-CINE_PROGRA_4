@@ -38,7 +38,7 @@ export class ButacaSeleccionComponent implements OnInit {
   protected total = computed(() => {
     const funcion = this.funcion();
     if (!funcion) return 0;
-    return this.butacasSeleccionadas().reduce((suma, b) => suma + this.precioButaca(b, funcion), 0);
+    return this.butacasSeleccionadas().reduce((suma, b) => suma + this.precioButaca(b, funcion), 0);//suma el precio de todas las butacas seleccionadas
   });
 
   protected creditoDisponible = computed(() => this.auth.session() ? this.auth.creditosDisponibles() : 0);
@@ -79,7 +79,7 @@ export class ButacaSeleccionComponent implements OnInit {
         this.entradaService.listarButacasOcupadas(funcionId),
       ]);
 
-      this.ocupadas.set(new Set((ocupadas ?? []).map((e) => e.butaca_id)));
+      this.ocupadas.set(new Set((ocupadas ?? []).map((e) => e.butaca_id)));//crea un conjunto de butacas ocupadas a partir de los datos obtenidos
       this.filas.set(this.agruparPorFila(butacas ?? []));
     } finally {
       this.cargando.set(false);
@@ -101,7 +101,7 @@ export class ButacaSeleccionComponent implements OnInit {
       this.error.set(`Esta película es apta para mayores de ${edadMinima} años. No podés comprar esta entrada.`);
     }
   }
-
+//funcion auxiliar para calcular la edad a partir de la fecha de nacimiento
   private calcularEdad(fechaNacimiento: string): number {
     const nacimiento = new Date(fechaNacimiento);
     const hoy = new Date();

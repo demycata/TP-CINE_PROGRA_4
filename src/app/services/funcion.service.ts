@@ -20,7 +20,7 @@ export class FuncionService {
     obtenerPorId(id: string) {//es para el crud de funciones, no para mostrar en la pagina de inicio
         return this.supabase.client.from('funciones').select('*').eq('id', id).single();
     }
-
+    //se usa para mostrar las funciones de una película en la página de inicio, devuelve la función con el nombre de la sala
     obtenerConSala(id: string) {
         return this.supabase.client
             .from('funciones')
@@ -45,7 +45,7 @@ export class FuncionService {
         const hoy = new Date().toISOString().slice(0, 10);
         return funcion.precio_preventa != null && !!funcion.fecha_fin_preventa && hoy <= funcion.fecha_fin_preventa;
     }
-
+    //si esta en preventa devuelve el precio de preventa, sino el precio base. Se usa para mostrar el precio en la página de inicio y en la página de detalle de película
     precioVigente(funcion: Pick<FuncionConSala, 'precio_base' | 'precio_preventa' | 'fecha_fin_preventa'>): number {
         return this.enPreventa(funcion) ? funcion.precio_preventa! : funcion.precio_base;
     }

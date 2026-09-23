@@ -34,20 +34,13 @@ export class PeliculaDetalleComponent implements OnInit {
     return lista.length ? lista.reduce((suma, r) => suma + r.estrellas, 0) / lista.length : 0;
   });
 
-  protected histograma = computed(() => {
-    const lista = this.resenas();
-    const total = lista.length;
-    return [5, 4, 3, 2, 1].map((estrellas) => {
-      const cantidad = lista.filter((r) => r.estrellas === estrellas).length;
-      return { estrellas, pct: total ? Math.round((cantidad / total) * 100) : 0 };
-    });
-  });
-
   protected diaSeleccionado = signal<string | null>(null);
 
-  protected dias = computed(() => [...new Set(this.funciones().map((f) => f.fecha))].sort());
+  protected dias = computed(() => [...new Set(this.funciones().map((f) => f.fecha))].sort());//devuelve un array con los dias de las funciones, sin repetir y ordenados 
 
-  protected gruposSala = computed(() => {
+
+  //funcion para el front, sirve para mostrar las funciones agrupadas por sala, formato e idioma, y ordenadas por hora de inicio
+  protected gruposSala = computed(() => {//devuelve las funciones agrupadas del dia seleccionado por sala, formato e idioma, y ordenadas por hora de inicio
     const dia = this.diaSeleccionado();
     const mapa = new Map<string, { sala: string; formato: string; idioma: string; funciones: FuncionConSala[] }>();
 
@@ -62,7 +55,7 @@ export class PeliculaDetalleComponent implements OnInit {
 
     return [...mapa.values()].map((grupo) => ({
       ...grupo,
-      funciones: grupo.funciones.sort((a, b) => a.hora_inicio.localeCompare(b.hora_inicio)),
+      funciones: grupo.funciones.sort((a, b) => a.hora_inicio.localeCompare(b.hora_inicio)),//ordena las funciones por hora de inicio
     }));
   });
 

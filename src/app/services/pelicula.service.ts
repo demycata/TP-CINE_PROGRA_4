@@ -31,7 +31,7 @@ export class PeliculaService {
             .select('*')
             .eq('activa', true)
             .not('fecha_estreno', 'is', null)
-            .gt('fecha_estreno', hoy)
+            .gt('fecha_estreno', hoy)//solo las que tienen fecha de estreno futura
             .order('fecha_estreno');
     }
 

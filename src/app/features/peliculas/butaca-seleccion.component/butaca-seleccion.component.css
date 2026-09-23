@@ -250,7 +250,7 @@ h1 {
 }
 
 .btn-comprar {
-  padding: var(--espacio-sm) var(--espacio-lg);
+  padding: var(--espacio-sm) 8rem;
   border: none;
   border-radius: var(--radio-borde);
   background-color: var(--color-acento);

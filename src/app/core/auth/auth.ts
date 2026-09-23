@@ -20,7 +20,7 @@ export class Auth {
             return this.cargarRol();
         });
 
-        this.supabase.client.auth.onAuthStateChange((_evento, session) => {
+        this.supabase.client.auth.onAuthStateChange((_evento, session) => {//cuando cambia la sesion, se actualiza la señal de session y se carga el rol del usuario
             this.session.set(session);
             this.cargarRol();
         });

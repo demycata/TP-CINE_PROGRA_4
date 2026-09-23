@@ -8,9 +8,7 @@ export class ResenaService {
     private supabase = inject(SupabaseService);
     private auth = inject(Auth);
 
-    //resenas.usuario_id no tiene FK a perfiles_publicos (es una vista, no una tabla), así que PostgREST no puede
-    //embeber el autor en un solo select: se trae aparte y se combina acá. La vista existe para exponer nombre/apellido
-    //públicamente sin abrir el resto de profiles (crédito, tipo de sangre, rol, etc.) que sí están protegidos por RLS.
+    //traemos solamente el nombre y apellido del autor, no el email ni otros datos sensibles
     async listarPorPelicula(peliculaId: string): Promise<{ data: Resena[] | null; error: { message: string } | null }> {
         const { data: resenas, error } = await this.supabase.client
             .from('resenas')
@@ -23,21 +21,21 @@ export class ResenaService {
         }
 
         const usuarioIds = [...new Set(resenas.map((r) => r.usuario_id))];
-        const { data: perfiles } = usuarioIds.length
+        const { data: perfiles } = usuarioIds.length//si esta no esta vacio ejecuta la query, sino devuelve un array vacio para no hacer la query
             ? await this.supabase.client.from('perfiles_publicos').select('id, nombre, apellido').in('id', usuarioIds)
             : { data: [] as { id: string; nombre: string; apellido: string }[] };
 
-        const nombrePorId = new Map((perfiles ?? []).map((p) => [p.id, `${p.nombre} ${p.apellido}`]));
+        const nombrePorId = new Map((perfiles ?? []).map((p) => [p.id, `${p.nombre} ${p.apellido}`]));//crea un mapa de id de usuario a nombre completo para poder mostrarlo en la reseña
 
         return {
-            data: resenas.map((r) => ({ ...r, autor: nombrePorId.get(r.usuario_id) ?? 'Usuario' })),
+            data: resenas.map((r) => ({ ...r, autor: nombrePorId.get(r.usuario_id) ?? 'Usuario' })),//devuelve las reseñas con el nombre del autor, si no se encuentra el nombre devuelve 'Usuario'
             error: null,
         };
     }
 
     miResena(peliculaId: string) {
         const usuarioId = this.auth.session()?.user.id;
-        if (!usuarioId) return Promise.resolve({ data: null, error: null });
+        if (!usuarioId) return Promise.resolve({ data: null, error: null });//si no hay usuario logueado no tiene sentido hacer la query, devolvemos null en todo
 
         return this.supabase.client
             .from('resenas')
@@ -47,23 +45,23 @@ export class ResenaService {
             .maybeSingle();
     }
 
-    async promedios(peliculaIds: string[]): Promise<Map<string, string>> {
-        if (peliculaIds.length === 0) return new Map();
+    async promedios(peliculaIds: string[]): Promise<Map<string, string>> {//devuelve una promesa con un Map que relaciona cada película con su promedio
+        if (peliculaIds.length === 0) return new Map(); //si no hay peliculas no tiene sentido hacer la query, devolvemos un mapa vacio
 
         const { data } = await this.supabase.client
             .from('resenas')
             .select('pelicula_id, estrellas')
             .in('pelicula_id', peliculaIds);
 
-        const porPelicula = new Map<string, number[]>();
-        for (const r of data ?? []) {
-            porPelicula.set(r.pelicula_id, [...(porPelicula.get(r.pelicula_id) ?? []), r.estrellas]);
+        const porPelicula = new Map<string, number[]>(); //crea un mapa vacio, cada clave será un ID de película y cada valor será un array de puntuaciones
+        for (const r of data ?? []) {//Busca las estrellas que ya estaban guardadas para esa película
+            porPelicula.set(r.pelicula_id, [...(porPelicula.get(r.pelicula_id) ?? []), r.estrellas]);//Si todavía no hay ninguna, usa un array vacío. Luego agrega la nueva puntuación y actualiza el mapa.
         }
 
         return new Map(
-            [...porPelicula].map(([id, estrellas]) => [
+            [...porPelicula].map(([id, estrellas]) => [//construye un par [id, promedio] para el Map.
                 id,
-                (estrellas.reduce((suma, e) => suma + e, 0) / estrellas.length).toFixed(1),
+                (estrellas.reduce((suma, e) => suma + e, 0) / estrellas.length).toFixed(1),//calcula el promedio de estrellas y lo redondea a 1 decimal
             ])
         );
     }

@@ -39,7 +39,7 @@ export class HomeComponent implements OnInit {
     });
   });
 
-  protected hasFiltros = computed(() => this.busqueda().trim().length > 0 || this.generosSeleccionados().length > 0);
+  protected hasFiltros = computed(() => this.busqueda().trim().length > 0 || this.generosSeleccionados().length > 0);//indica si hay filtros aplicados (busqueda o generos seleccionados) 
 
   constructor(
     protected auth: Auth,
@@ -72,12 +72,15 @@ export class HomeComponent implements OnInit {
       if (generos.error) {console.error(generos.error);}
       else {this.generosDisponibles.set((generos.data || []).map((g) => g.nombre));}
 
+
+      //funciones para el proceso de ratings y alertas: se hace en paralelo con la carga de peliculas y generos, para no bloquear la UI
       const idsConPoster = [...(masVistas.data ?? []), ...(cartelera.data ?? []), ...(proximamente.data ?? [])];
-      const ids = [...new Set(idsConPoster.map((p) => p.id!))];
+      const ids = [...new Set(idsConPoster.map((p) => p.id!))];//filtra los ids de peliculas que tienen poster, para no hacer la query de ratings de peliculas que no se muestran
       this.ratings.set(await this.resenaService.promedios(ids));
 
       await this.auth.listo;
       const usuarioId = this.auth.session()?.user.id;
+      //si hay usuario logueado, se traen sus alertas y se chequea si alguna de ellas ya tiene funciones a la venta, para mostrar un toast notificando
       if (usuarioId) {
         const [{ data: misAlertas }, disponibles] = await Promise.all([
           this.alertaService.misAlertas(usuarioId),
