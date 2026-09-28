@@ -23,3 +23,9 @@ export interface OrdenMisEntradas {//interface que se usa para devolver las orde
         } | null;
     }[];
 }
+
+export interface OrdenValidada {//datos que ve el empleado al validar el QR de una orden
+    id: string;
+    funcion: { fecha: string; hora_inicio: string; formato: string; idioma: string; sala: string; pelicula: string };
+    butacas: { fila: string; columna: number; tipo_butaca: 'normal' | 'accesible' | 'vip' }[];
+}

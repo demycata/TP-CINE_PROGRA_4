@@ -1,7 +1,8 @@
 import { Service, inject } from '@angular/core';
 import { SupabaseService } from '../core/supabase/supabase.service';
 import { Auth } from '../core/auth/auth';
-import { EntradaComprada } from '../models/entrada.model';
+import { EntradaComprada, OrdenValidada } from '../models/entrada.model';
+import { hoyISO } from '../shared/fecha.utils';
 
 const BUTACA_OCUPADA = '23505';//codigo de supabase para violacion de constraint de unicidad
 
@@ -71,6 +72,61 @@ export class EntradaService {
         return { error: null };
     }
 
+
+    //primero se lee la orden para poder explicar por qué se rechaza (no existe, cancelada, ya usada, otro día).
+    //el update final vuelve a exigir estado_qr_entradas = 'valido': si dos empleados escanean el mismo QR a la vez,
+    //solo a uno le devuelve la fila y al otro le sale "ya fue usado".
+    async validarQr(codigo: string): Promise<{ data: OrdenValidada | null; error: { message: string } | null }> {
+        const { data: orden } = await this.supabase.client
+            .from('ordenes')
+            .select(`
+                id, estado, estado_qr_entradas,
+                entradas (
+                    butacas ( fila, columna, tipo_butaca ),
+                    funciones ( fecha, hora_inicio, formato, idioma, salas ( nombre ), peliculas ( titulo ) )
+                )
+            `)
+            .eq('qr_code', codigo)
+            .maybeSingle();
+
+        if (!orden) return { data: null, error: { message: 'El código no corresponde a ninguna compra.' } };
+        if (orden.estado === 'cancelada') return { data: null, error: { message: 'La compra fue cancelada.' } };
+        if (orden.estado_qr_entradas === 'usado') return { data: null, error: { message: 'Este QR ya fue usado.' } };
+
+        const funcion: any = orden.entradas[0]?.funciones;
+        if (orden.estado !== 'pagada' || orden.estado_qr_entradas !== 'valido' || !funcion) {
+            return { data: null, error: { message: 'El QR no tiene entradas válidas.' } };
+        }
+        if (funcion.fecha !== hoyISO()) {
+            return { data: null, error: { message: 'La función no es de hoy.' } };
+        }
+
+        const { data: actualizada } = await this.supabase.client
+            .from('ordenes')
+            .update({ estado_qr_entradas: 'usado' })
+            .eq('id', orden.id)
+            .eq('estado_qr_entradas', 'valido')
+            .select('id')
+            .maybeSingle();
+
+        if (!actualizada) return { data: null, error: { message: 'Este QR ya fue usado.' } };
+
+        return {
+            data: {
+                id: orden.id,
+                funcion: {
+                    fecha: funcion.fecha,
+                    hora_inicio: funcion.hora_inicio,
+                    formato: funcion.formato,
+                    idioma: funcion.idioma,
+                    sala: funcion.salas?.nombre ?? '',
+                    pelicula: funcion.peliculas?.titulo ?? '',
+                },
+                butacas: orden.entradas.map((e: any) => e.butacas).filter(Boolean),
+            },
+            error: null,
+        };
+    }
 
     //el UNIQUE(funcion_id, butaca_id) de la tabla entradas sigue siendo el que de verdad evita que se venda dos veces la misma butaca:
     //si dos compras llegan al mismo tiempo, las dos pasan el chequeo de "está libre" en el front, pero solo una gana el insert.

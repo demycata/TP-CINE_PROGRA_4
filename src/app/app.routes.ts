@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { adminGuard } from './core/auth/admin.guard';
+import { empleadoGuard } from './core/auth/empleado.guard';
 
 export const routes: Routes = [
   {
@@ -36,6 +37,14 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./features/perfil/perfil.component/perfil.component').then(
         (m) => m.PerfilComponent
+      ),
+  },
+  {
+    path: 'validar',
+    canMatch: [empleadoGuard],
+    loadComponent: () =>
+      import('./features/empleado/validar-qr.component/validar-qr.component').then(
+        (m) => m.ValidarQrComponent
       ),
   },
   {

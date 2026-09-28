@@ -1,0 +1,46 @@
+<section class="validar">
+    <h1>Validar entradas</h1>
+
+    <div id="lector-qr" class="lector" [class.oculto]="!escaneando()"></div>
+
+    @if (escaneando()) {
+        <button type="button" class="btn" (click)="detenerCamara()">Detener cámara</button>
+    } @else {
+        <button type="button" class="btn" [disabled]="enviado()" (click)="iniciarCamara()">Escanear QR</button>
+    }
+
+    @if (errorCamara()) {
+        <small class="error">{{ errorCamara() }}</small>
+    }
+
+    <form class="form" [formGroup]="formCodigo" (ngSubmit)="onSubmit()">
+        <label for="codigo">O ingresá el código a mano:</label>
+        <input type="text" id="codigo" formControlName="codigo" placeholder="Código del QR">
+
+        <button type="submit" [disabled]="enviado()">
+            @if (enviado()) { <app-spinner [inline]="true" /> }
+            Validar
+        </button>
+    </form>
+
+    @if (error()) {
+        <div class="resultado rechazado">
+            <strong>Rechazado</strong>
+            <small class="error">{{ error() }}</small>
+        </div>
+    }
+
+    @if (resultado(); as orden) {
+        <div class="resultado aprobado">
+            <strong>Entrada válida — puede pasar</strong>
+            <p class="titulo">{{ orden.funcion.pelicula }}</p>
+            <p>{{ orden.funcion.sala }} · {{ orden.funcion.fecha | date:'EEE d MMM y' }} · {{ orden.funcion.hora_inicio | slice:0:5 }} · {{ orden.funcion.formato }} {{ orden.funcion.idioma }}</p>
+            <p>
+                Butacas:
+                @for (butaca of orden.butacas; track butaca.fila + butaca.columna) {
+                    <span class="butaca" [class.vip]="butaca.tipo_butaca === 'vip'">{{ butaca.fila }}{{ butaca.columna }}</span>
+                }
+            </p>
+        </div>
+    }
+</section>

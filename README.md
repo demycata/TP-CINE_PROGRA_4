@@ -42,7 +42,7 @@ Signals para todo el estado local y compartido (sesión y rol del usuario, butac
 
 - Supabase Auth (email/password). La tabla `profiles` se crea sola vía trigger (`crear_perfil_nuevo_usuario`) cuando se registra un usuario en `auth.users`, con un campo `rol` (`cliente` / `empleado` / `admin`).
 - **La protección real de los roles vive en Row Level Security**, no en el cliente: las tablas de catálogo (`peliculas`, `salas`, `funciones`, `generos`, `categorias_producto`, `productos`, `combos`, `cupones`, `recompensas_puntos`) tienen SELECT público pero INSERT/UPDATE/DELETE restringido a `rol_actual() = 'admin'` a nivel de base de datos.
-- El guard funcional `adminGuard` sobre `/admin` espera `Auth.listo` (una `Promise<void>`, no la signal `rol`) antes de resolver 
+- El guard funcional `adminGuard` sobre `/admin` espera `Auth.listo` (una `Promise<void>`, no la signal `rol`) antes de resolver. `empleadoGuard` sobre `/validar` sigue el mismo patrón y deja pasar a `empleado` y `admin`.
 - Registro con `<select>` de opciones fijas (no texto libre) para tipo de sangre y color de ojos, con un validator propio (`shared/opcion-valida.validator.ts`), como defensa extra sobre el `CHECK` de la base.
 
 ### Salas, funciones y asignación automática
@@ -62,6 +62,14 @@ Signals para todo el estado local y compartido (sesión y rol del usuario, butac
 - Al finalizar, se genera QR (`qrcode`) + PDF (`jsPDF`) en el cliente con el detalle de butacas, subtotal, crédito aplicado y total pagado — ambos importados dinámicamente para no inflar el bundle inicial.
 - Cancelación (`EntradaService.cancelar`, solo para usuarios registrados): pone la orden en `cancelada` y acredita el total como crédito, hasta 2hs antes de la función. No borra la fila de `entradas` — `listarButacasOcupadas` excluye órdenes canceladas, así la butaca vuelve a estar disponible sola.
 - Se dejaron **sin** mover al cliente `rol_actual()` (la función detrás de casi todas las policies de RLS) y `crear_perfil_nuevo_usuario` (el trigger que crea el perfil al registrarse): la primera es la base de la seguridad por roles — moverla rompería la garantía de "roles reforzados a nivel de RLS, no solo en el cliente" — y la segunda evita que un registro quede sin perfil si el cliente falla entre el `signUp` y la creación del perfil.
+
+### Validación de QR (empleados)
+
+- Pantalla `/validar` para empleados y admin: lector de cámara (`html5-qrcode`, importado dinámicamente solo al tocar "Escanear QR") y un input para ingresar el código a mano si el lector falla.
+- Usa las columnas que ya tenía `ordenes`, sin migraciones: `estado_qr_entradas` (`valido` → `usado`). `comprar()` la deja en `valido`; `estado_qr_candy` queda en `no_aplica` hasta que haya venta de candy bar, y se validará igual pero de forma independiente.
+- `EntradaService.validarQr(codigo)` solo aprueba si la orden está `pagada`, el QR está `valido` y la función es **de hoy**. Si no, explica el motivo: código inexistente, compra cancelada, QR ya usado o función de otro día.
+- El update final vuelve a filtrar por `estado_qr_entradas = 'valido'`: si dos empleados escanean el mismo QR al mismo tiempo, solo uno lo aprueba y al otro le sale "ya fue usado".
+- Los permisos vienen de la RLS existente (`ordenes_select`/`ordenes_update` ya contemplaban `empleado`/`admin`).
 
 ### Reseñas
 
@@ -96,6 +104,7 @@ src/app/
     ├── auth/            # login, registro
     ├── peliculas/        # detalle de película (reseñas, funciones) y selección de butacas/compra
     ├── perfil/          # perfil, crédito, Mis entradas, Mis películas
+    ├── empleado/        # validación de QR (/validar)
     └── admin/            # panel de administración (peliculas, generos, salas, funciones, productos, categorias-producto, usuarios)
 ```
 
@@ -110,6 +119,6 @@ npm start        # ng serve, http://localhost:4200
 
 ## Estado actual
 
-**Implementado**: login/registro, guard de admin, panel de administración con CRUD de películas (+ géneros multi-select desde tabla `generos`, activar/desactivar), géneros (alta), salas (alta simple con generación automática de butacas), funciones (alta/edición con asignación automática de sala y precio VIP/preventa), categorías de producto, productos, listado de usuarios con cambio de rol, home pública con "Próximamente" (+ alertas de disponibilidad), "Más vendidas de la semana" y Cartelera con buscador/filtro por género, detalle de película con reseñas (estrellas + comentario, promedio) y selección de función, selección de butacas (mapa real de la sala, ocupadas marcadas, precio VIP, restricción de edad) con panel de compra (crédito a usar) y generación de PDF + QR, perfil con crédito disponible, "Mis entradas" (cancelables hasta 2hs antes, con reintegro en crédito) y "Mis películas". PWA instalable, deploy a Firebase Hosting con preview automático por PR.
+**Implementado**: login/registro, guard de admin, panel de administración con CRUD de películas (+ géneros multi-select desde tabla `generos`, activar/desactivar), géneros (alta), salas (alta simple con generación automática de butacas), funciones (alta/edición con asignación automática de sala y precio VIP/preventa), categorías de producto, productos, listado de usuarios con cambio de rol, home pública con "Próximamente" (+ alertas de disponibilidad), "Más vendidas de la semana" y Cartelera con buscador/filtro por género, detalle de película con reseñas (estrellas + comentario, promedio) y selección de función, selección de butacas (mapa real de la sala, ocupadas marcadas, precio VIP, restricción de edad) con panel de compra (crédito a usar) y generación de PDF + QR, perfil con crédito disponible, "Mis entradas" (cancelables hasta 2hs antes, con reintegro en crédito) y "Mis películas", validación de QR de entradas por empleados (cámara o código manual, solo funciones del día). PWA instalable, deploy a Firebase Hosting con preview automático por PR.
 
-**Pendiente**: cupón 20% primera compra y cupones segmentados, puntos de fidelización (canje por entrada/producto), candy bar y combos en la compra, validación de QR por empleados, reportes y log de actividad del admin.
+**Pendiente**: cupón 20% primera compra y cupones segmentados, puntos de fidelización (canje por entrada/producto), candy bar y combos en la compra (y la validación del QR para retirar productos), reportes y log de actividad del admin.
