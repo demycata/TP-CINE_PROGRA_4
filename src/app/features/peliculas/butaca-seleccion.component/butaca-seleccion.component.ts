@@ -1,28 +1,28 @@
-import { Component, OnInit, computed, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, computed, signal } from '@angular/core';
+import { CurrencyPipe, DatePipe, SlicePipe } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { PeliculaService } from '../../../services/pelicula.service';
 import { FuncionService } from '../../../services/funcion.service';
 import { ButacaService } from '../../../services/butaca.service';
 import { EntradaService } from '../../../services/entrada.service';
+import { ButacaRealtimeService } from '../../../services/butaca-realtime.service';
 import { Auth } from '../../../core/auth/auth';
 import { ToastService } from '../../../shared/toast.service';
 import { SpinnerComponent } from '../../../shared/spinner.component/spinner.component';
 import { Pelicula } from '../../../models/pelicula.model';
 import { FuncionConSala } from '../../../models/funcion.model';
-import { Butaca, FilaButacas } from '../../../models/butaca.model';
+import { Butaca, FilaButacas, FILAS_NORMALES, FILAS_VIP } from '../../../models/butaca.model';
 
-const FILAS_NORMALES = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'L', 'M', 'N', 'O', 'P', 'Q'];
-const FILAS_VIP = ['R', 'S', 'T'];
 const ORDEN_FILAS = [...FILAS_NORMALES.slice(0, 9), 'J', ...FILAS_NORMALES.slice(9), ...FILAS_VIP];
 const MAX_BUTACAS_POR_COMPRA = 8;
 
 @Component({
-  imports: [RouterLink, SpinnerComponent],
+  imports: [RouterLink, SpinnerComponent, CurrencyPipe, DatePipe, SlicePipe],
   selector: 'app-butaca-seleccion',
   styleUrl: './butaca-seleccion.component.css',
   templateUrl: './butaca-seleccion.component.html',
 })
-export class ButacaSeleccionComponent implements OnInit {
+export class ButacaSeleccionComponent implements OnInit, OnDestroy {
   protected pelicula = signal<Pelicula | null>(null);
   protected funcion = signal<FuncionConSala | null>(null);
   protected filas = signal<FilaButacas[]>([]);
@@ -53,6 +53,7 @@ export class ButacaSeleccionComponent implements OnInit {
     private funcionService: FuncionService,
     private butacaService: ButacaService,
     private entradaService: EntradaService,
+    private butacaRealtime: ButacaRealtimeService,
     private auth: Auth,
     private toast: ToastService,
   ) {
@@ -81,9 +82,27 @@ export class ButacaSeleccionComponent implements OnInit {
 
       this.ocupadas.set(new Set((ocupadas ?? []).map((e) => e.butaca_id)));//crea un conjunto de butacas ocupadas a partir de los datos obtenidos
       this.filas.set(this.agruparPorFila(butacas ?? []));
+
+      this.butacaRealtime.escuchar(funcionId, (butacaIds) => this.marcarCompradasPorOtro(butacaIds));//a partir de acá, si otro cliente compra butacas de esta función, se marcan como ocupadas sin recargar
     } finally {
       this.cargando.set(false);
     }
+  }
+
+  ngOnDestroy() {
+    this.butacaRealtime.salir();//al irse de la pantalla deja de escuchar el canal de la función
+  }
+
+  //se ejecuta cuando llega el aviso de compra de otro cliente por el canal de Realtime
+  private marcarCompradasPorOtro(butacaIds: string[]) {
+    this.ocupadas.update((actuales) => new Set([...actuales, ...butacaIds]));//suma las butacas recién compradas al conjunto de ocupadas, así el mapa las pinta en rojo al instante
+
+    const seleccionadas = this.butacasSeleccionadas();
+    const perdidas = seleccionadas.filter((b) => butacaIds.includes(b.id));//butacas que yo tenía elegidas y que otro compró primero
+    if (perdidas.length === 0) return;
+
+    this.butacasSeleccionadas.set(seleccionadas.filter((b) => !butacaIds.includes(b.id)));//las saca de mi selección para que no intente comprarlas
+    this.toast.mostrar(`Otra persona compró ${perdidas.map((b) => `${b.fila}${b.columna}`).join(', ')}. Se quitaron de tu selección.`);
   }
 
   private async verificarRestriccionEdad(pelicula: Pelicula | null) {
@@ -113,16 +132,16 @@ export class ButacaSeleccionComponent implements OnInit {
     return edad;
   }
 
-  private agruparPorFila(butacas: Butaca[]): FilaButacas[] {
-    const porFila = new Map<string, Butaca[]>();
+  private agruparPorFila(butacas: Butaca[]): FilaButacas[] {//organiza las butacas para poder mostrarlas correctamente en el mapa del cine
+    const porFila = new Map<string, Butaca[]>();//Crea un Map donde:la clave es el nombre de la fila, por ejemplo "A"; el valor es un array de butacas de esa fila.
     for (const butaca of butacas) {
-      const lista = porFila.get(butaca.fila) ?? [];
+      const lista = porFila.get(butaca.fila) ?? [];//obtiene la lista de butacas de la fila actual, o un array vacío si no existe
       lista.push(butaca);
       porFila.set(butaca.fila, lista);
     }
 
-    return ORDEN_FILAS.filter((fila) => porFila.has(fila)).map((fila) => {
-      const ordenadas = [...porFila.get(fila)!].sort((a, b) => a.columna - b.columna);
+    return ORDEN_FILAS.filter((fila) => porFila.has(fila)).map((fila) => {//filtra las filas que existen en el Map y las ordena según ORDEN_FILAS
+      const ordenadas = [...porFila.get(fila)!].sort((a, b) => a.columna - b.columna);//ordena las butacas de la fila por número de columna
       const borde = fila === 'J' ? 2 : 4;
       return {
         fila,
@@ -137,7 +156,7 @@ export class ButacaSeleccionComponent implements OnInit {
     if (this.ocupadas().has(butaca.id) || this.edadInsuficiente()) return;
 
     const actuales = this.butacasSeleccionadas();
-    if (actuales.some((b) => b.id === butaca.id)) {
+    if (actuales.some((b) => b.id === butaca.id)) {//si la butaca ya estaba seleccionada, la deselecciona
       this.butacasSeleccionadas.set(actuales.filter((b) => b.id !== butaca.id));
       this.error.set(null);
       return;
@@ -148,7 +167,7 @@ export class ButacaSeleccionComponent implements OnInit {
       return;
     }
 
-    this.butacasSeleccionadas.set([...actuales, butaca]);
+    this.butacasSeleccionadas.set([...actuales, butaca]);//si la butaca no estaba seleccionada, la agrega a la lista de seleccionadas
     this.error.set(null);
   }
 
@@ -190,7 +209,7 @@ export class ButacaSeleccionComponent implements OnInit {
     if (error || !data) {
       this.error.set(error?.message ?? 'No se pudo generar la entrada.');
       this.generandoPdf.set(false);
-      if (error?.message.includes('tomó una de esas butacas')) {
+      if (error?.message.includes('tomó una de esas butacas')) {//si la compra falló porque otra persona compró una de las butacas seleccionadas, actualiza la lista de butacas ocupadas y deselecciona las que ya no están disponibles
         const { data: ocupadasActuales } = await this.entradaService.listarButacasOcupadas(funcion.id);
         const idsOcupados = new Set((ocupadasActuales ?? []).map((e) => e.butaca_id));
         this.ocupadas.set(idsOcupados);
@@ -198,6 +217,8 @@ export class ButacaSeleccionComponent implements OnInit {
       }
       return;
     }
+
+    await this.butacaRealtime.notificarCompra(butacas.map((b) => b.id));//avisa por el canal de Realtime a los demás clientes que están viendo esta función que estas butacas ya se vendieron
 
     const [{ jsPDF }, { default: QRCode }] = await Promise.all([import('jspdf'), import('qrcode')]);
     const qrDataUrl = await QRCode.toDataURL(data.orden.qr_code);

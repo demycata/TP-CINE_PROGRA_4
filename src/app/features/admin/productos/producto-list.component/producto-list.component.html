@@ -21,7 +21,7 @@
             <tr>
                 <td>{{ producto.nombre }}</td>
                 <td>{{ producto.categorias_producto?.nombre }}</td>
-                <td>{{ producto.precio }}</td>
+                <td>{{ producto.precio | currency:'ARS':'symbol-narrow':'1.0-2' }}</td>
                 <td>{{ producto.activo ? 'Sí' : 'No' }}</td>
                 <td>
                     <a [routerLink]="['/admin/productos', producto.id, 'editar']">Editar</a>

@@ -21,7 +21,7 @@
             <tr>
                 <td>{{ pelicula.titulo }}</td>
                 <td>{{ pelicula.duracion_minutos }} min</td>
-                <td>{{ pelicula.fecha_estreno }}</td>
+                <td>{{ pelicula.fecha_estreno | date:'dd/MM/y' }}</td>
                 <td>{{ pelicula.activa ? 'Sí' : 'No' }}</td>
                 <td>
                     <a [routerLink]="['/admin/peliculas', pelicula.id, 'editar']">Editar</a>

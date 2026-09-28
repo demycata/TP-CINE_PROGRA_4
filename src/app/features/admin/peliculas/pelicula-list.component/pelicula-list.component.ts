@@ -1,3 +1,4 @@
+import { DatePipe } from '@angular/common';
 import { Component, OnInit, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { PeliculaService } from '../../../../services/pelicula.service';
@@ -5,7 +6,7 @@ import { SpinnerComponent } from '../../../../shared/spinner.component/spinner.c
 import { FilaPelicula } from '../../../../models/pelicula.model';
 
 @Component({
-  imports: [RouterLink, SpinnerComponent],
+  imports: [RouterLink, SpinnerComponent, DatePipe],
   selector: 'app-pelicula-list',
   styleUrl: './pelicula-list.component.css',
   templateUrl: './pelicula-list.component.html',

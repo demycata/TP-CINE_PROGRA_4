@@ -3,7 +3,7 @@
 @if (!cargando() && creditoDisponible() > 0) {
     <section class="credito">
         <span>Crédito disponible</span>
-        <strong>${{ creditoDisponible() }}</strong>
+        <strong>{{ creditoDisponible() | currency:'ARS':'symbol-narrow':'1.0-2' }}</strong>
     </section>
 }
 
@@ -21,14 +21,14 @@
                     <div class="orden-info">
                         <p class="titulo">{{ orden.entradas[0].funciones?.peliculas?.titulo }}</p>
                         <p class="meta">
-                            {{ orden.entradas[0].funciones?.fecha }} {{ orden.entradas[0].funciones?.hora_inicio?.slice(0, 5) }}
+                            {{ orden.entradas[0].funciones?.fecha | date:'EEE d MMM y' }} {{ orden.entradas[0].funciones?.hora_inicio | slice:0:5 }}
                             · Sala {{ orden.entradas[0].funciones?.salas?.nombre }}
                             · {{ orden.entradas[0].funciones?.formato }} {{ orden.entradas[0].funciones?.idioma }}
                         </p>
                         <p class="meta">
                             Butacas: {{ butacasTexto(orden) }}
                         </p>
-                        <p class="meta">Total: ${{ orden.total }}</p>
+                        <p class="meta">Total: {{ orden.total | currency:'ARS':'symbol-narrow':'1.0-2' }}</p>
                     </div>
 
                     <div class="orden-acciones">
@@ -59,9 +59,9 @@
                 <a class="card-pelicula" [routerLink]="['/peliculas', peli.id]">
                     <div class="poster"><img [src]="peli.imagen_url" [alt]="peli.titulo"></div>
                     <p class="titulo">{{ peli.titulo }}</p>
-                    <p class="meta">{{ peli.fecha }}</p>
+                    <p class="meta">{{ peli.fecha | date:'d MMM y' }}</p>
                     @if (peli.calificacion) {
-                        <p class="calificacion">{{ estrellasTexto(peli.calificacion) }}</p>
+                        <p class="calificacion">{{ peli.calificacion | estrellas }}</p>
                     } @else {
                         <p class="calificacion sin-calificar">Sin calificar todavía</p>
                     }

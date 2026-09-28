@@ -25,12 +25,12 @@
             <tr>
                 <td>{{ funcion.peliculas?.titulo }}</td>
                 <td>{{ funcion.salas?.nombre }}</td>
-                <td>{{ funcion.fecha }}</td>
-                <td>{{ funcion.hora_inicio }} - {{ funcion.hora_fin }}</td>
+                <td>{{ funcion.fecha | date:'dd/MM/y' }}</td>
+                <td>{{ funcion.hora_inicio | slice:0:5 }} - {{ funcion.hora_fin | slice:0:5 }}</td>
                 <td>{{ funcion.formato }}</td>
                 <td>{{ funcion.idioma }}</td>
-                <td>{{ funcion.precio_base }}</td>
-                <td>{{ funcion.precio_vip }}</td>
+                <td>{{ funcion.precio_base | currency:'ARS':'symbol-narrow':'1.0-2' }}</td>
+                <td>{{ funcion.precio_vip | currency:'ARS':'symbol-narrow':'1.0-2' }}</td>
                 <td>
                     <a [routerLink]="['/admin/funciones', funcion.id, 'editar']">Editar</a>
                 </td>

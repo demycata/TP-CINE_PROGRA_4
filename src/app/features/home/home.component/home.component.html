@@ -10,13 +10,13 @@
                 <div class="poster">
                     <img [src]="peli.imagen_url" [alt]="peli.titulo">
                     @if (rating(peli.id!); as valor) {
-                        <span class="badge-rating">{{ valor }}</span>
+                        <span class="badge-rating">{{ valor | number:'1.1-1' }}</span>
                     }
                 </div>
                 <div class="info">
-                    <span class="estreno">{{ estrenoTexto(peli.fecha_estreno!) }}</span>
+                    <span class="estreno">Estreno {{ peli.fecha_estreno | date:'d MMM' }}</span>
                     <p class="titulo">{{ peli.titulo }}</p>
-                    <p class="meta">{{ metaLine(peli) }}</p>
+                    <p class="meta">{{ peli | metaPelicula }}</p>
                     <button
                         type="button"
                         class="btn-avisarme"
@@ -39,11 +39,11 @@
                     <img [src]="peli.imagen_url" [alt]="peli.titulo">
                     <span class="rank">{{ i + 1 }}</span>
                     @if (rating(peli.id!); as valor) {
-                        <span class="badge-rating">{{ valor }}</span>
+                        <span class="badge-rating">{{ valor | number:'1.1-1' }}</span>
                     }
                 </div>
                 <p class="titulo">{{ peli.titulo }}</p>
-                <p class="meta">{{ metaLine(peli) }}</p>
+                <p class="meta">{{ peli | metaPelicula }}</p>
             </a>
         }
     </div>
@@ -87,11 +87,11 @@
                 <div class="poster">
                     <img [src]="item.imagen_url" [alt]="item.titulo">
                     @if (rating(item.id!); as valor) {
-                        <span class="badge-rating">{{ valor }}</span>
+                        <span class="badge-rating">{{ valor | number:'1.1-1' }}</span>
                     }
                 </div>
                 <p class="titulo">{{ item.titulo }}</p>
-                <p class="meta">{{ metaLine(item) }}</p>
+                <p class="meta">{{ item | metaPelicula }}</p>
             </a>
         }
     </div>

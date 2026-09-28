@@ -10,14 +10,13 @@ export class EntradaService {
     private supabase = inject(SupabaseService);
     private auth = inject(Auth);
 
-    //la orden!inner filtra las entradas cuya orden está cancelada: al cancelar no se borra la fila de entradas (no hay policy de DELETE),
-    //simplemente deja de contar como ocupada y la butaca vuelve a estar disponible para la venta.
+    //se lee de la vista butacas_ocupadas y no de entradas: la RLS de entradas solo deja ver las propias (o anónimas), así que las
+    //compradas por otros usuarios registrados aparecían libres. La vista solo expone funcion_id/butaca_id y ya excluye órdenes canceladas.
     listarButacasOcupadas(funcionId: string) {
         return this.supabase.client
-            .from('entradas')
-            .select('butaca_id, ordenes!inner(estado)')
-            .eq('funcion_id', funcionId)
-            .neq('ordenes.estado', 'cancelada');
+            .from('butacas_ocupadas')
+            .select('butaca_id')
+            .eq('funcion_id', funcionId);
     }
 
     misEntradas(usuarioId: string) {

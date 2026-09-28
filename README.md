@@ -23,17 +23,32 @@ Catálogo de películas, gestión de salas/funciones con asignación automática
 ### Estado
 
 Signals para todo el estado local y compartido (sesión y rol del usuario, butacas seleccionadas, carrito, estados de carga/error de formularios).
+
+### Pipes para transformar fechas y valores
+
+- El formato de lo que se muestra en pantalla se resuelve con **pipes en el template**, no con métodos auxiliares en cada componente. Un pipe puro solo se recalcula cuando cambia el valor que recibe (un método en el template se ejecuta en cada detección de cambios) y se reutiliza en cualquier pantalla sin duplicar código.
+- Se registró el locale `es-AR` en `app.config.ts` (`LOCALE_ID`), así los pipes de Angular devuelven meses y días en español, `$` como símbolo y punto como separador de miles.
+- Siempre que alcanza se usan los **pipes de Angular**:
+  - `date` para fechas: `'d MMM'` → "15 oct", `'EEE'` → "jue", `'EEE d MMM y'` en "Mis entradas", `'dd/MM/y'` en los listados de admin.
+  - `slice:0:5` para horas (la base las devuelve como `HH:mm:ss`) → "20:30".
+  - `currency:'ARS':'symbol-narrow':'1.0-2'` para precios, créditos y totales → "$ 1.500".
+  - `number:'1.1-1'` para los promedios de reseñas → "4,3".
+- Solo donde Angular no trae nada equivalente hay **pipes propios** en `shared/pipes/`:
+  - `estrellas`: convierte un número de 1 a 5 en ★★★★☆ (redondea, así sirve también para promedios).
+  - `metaPelicula`: arma la línea de info de una película con géneros + duración → "Acción · Drama · 2h 5m".
+- Los ternarios chicos del template (Sí/No, reseña/reseñas, +13/ATP) se dejaron como están, y los textos armados en TypeScript (toasts, PDF de la entrada) no pasan por pipes.
+- La fecha de "hoy" para las consultas sale de `hoyISO()` (`shared/fecha.utils.ts`) y no de `new Date().toISOString()`: esta última devuelve la fecha en UTC, y en Argentina, después de las 21hs, ya daba el día siguiente.
 ### Autenticación y roles
 
 - Supabase Auth (email/password). La tabla `profiles` se crea sola vía trigger (`crear_perfil_nuevo_usuario`) cuando se registra un usuario en `auth.users`, con un campo `rol` (`cliente` / `empleado` / `admin`).
 - **La protección real de los roles vive en Row Level Security**, no en el cliente: las tablas de catálogo (`peliculas`, `salas`, `funciones`, `generos`, `categorias_producto`, `productos`, `combos`, `cupones`, `recompensas_puntos`) tienen SELECT público pero INSERT/UPDATE/DELETE restringido a `rol_actual() = 'admin'` a nivel de base de datos.
-- El guard funcional `adminGuard` sobre `/admin` espera `Auth.listo` (una `Promise<void>`, no la signal `rol`) antes de resolver — el bug original solo se notaba con carga directa de una URL de `/admin`, porque en navegación SPA normal el rol ya estaba cargado de antes. En la misma línea, `Auth.login()` espera a que `cargarRol()` termine antes de resolver, así el link "Admin" de la navbar aparece sin necesidad de refrescar.
-- Registro con `<select>` de opciones fijas (no texto libre) para tipo de sangre y color de ojos, con un validator propio (`shared/opcion-valida.validator.ts`) al estilo `Validators.required`, como defensa extra sobre el `CHECK` de la base.
+- El guard funcional `adminGuard` sobre `/admin` espera `Auth.listo` (una `Promise<void>`, no la signal `rol`) antes de resolver 
+- Registro con `<select>` de opciones fijas (no texto libre) para tipo de sangre y color de ojos, con un validator propio (`shared/opcion-valida.validator.ts`), como defensa extra sobre el `CHECK` de la base.
 
 ### Salas, funciones y asignación automática
 
 - Al dar de alta una sala solo se pide el nombre: `SalaService.crear()` inserta la sala y arma sus butacas en el mismo paso (28 por fila normal A-I/L-Q, la fila accesible "J" con 14 reemplazando a J y K, y las filas VIP R/S/T con 28 cada una). Si falla el insert de butacas, se borra la sala recién creada para no dejarla a medio armar.
-- **La sala de una función no la elige el admin.** `FuncionService` trae todas las salas y las funciones ya cargadas ese día, descarta las salas que solapan con la ventana horaria pedida (`hora_inicio` → `hora_fin` + 30 min de buffer) y asigna la primera libre. El `EXCLUDE` constraint `funciones_no_solapamiento` en la base es el respaldo final, no el mecanismo principal.
+- **La sala de una función no la elige el admin.** `FuncionService` trae todas las salas y las funciones ya cargadas ese día, descarta las salas que solapan con la ventana horaria pedida (`hora_inicio` → `hora_fin` + 30 min de buffer) y asigna la primera libre. 
 - Antes de asignar, se valida en Angular que la función no cruce la medianoche.
 - `funciones.precio_vip` (`NOT NULL`, `CHECK (precio_vip > precio_base)`) es un precio aparte para las butacas VIP (filas R/S/T), validado también en el propio form antes de tocar la base. `funciones.precio_preventa`/`fecha_fin_preventa` habilitan un precio especial configurable por función mientras `hoy <= fecha_fin_preventa`; las butacas VIP nunca entran en preventa, siempre cobran `precio_vip`. No hay ventana automática de apertura: el admin decide cuándo empieza a regir cargando esos valores.
 
@@ -51,9 +66,8 @@ Signals para todo el estado local y compartido (sesión y rol del usuario, butac
 ### Reseñas
 
 - Cualquier usuario logueado puede calificar (1-5 estrellas) y comentar cualquier película, sin haber comprado entrada — `UNIQUE(usuario_id, pelicula_id)` en la base, `ResenaService.guardar` hace `upsert` sobre esa constraint.
-- Para mostrar el nombre del autor de una reseña ajena hizo falta una vista `perfiles_publicos (id, nombre, apellido)`: `profiles_select` solo deja ver la fila propia, así que un embed directo a `profiles` devuelve `null` para las demás. La vista corre con los privilegios de quien la creó (bypassea esa RLS) pero solo expone nombre/apellido. Como no hay FK de `resenas` a una vista, `listarPorPelicula` hace dos queries (reseñas, después nombres por `.in()`) y las combina en TS.
-- El promedio de estrellas se calcula en TS sobre la lista ya traída, mismo criterio que el filtro de géneros: no hay vista/RPC de agregación porque el volumen de datos es chico.
 
+- El promedio de estrellas se calcula en TS sobre la lista ya traída.
 ### "Próximamente" y alertas de disponibilidad
 
 - `PeliculaService.proximamente()` trae películas activas con `fecha_estreno` futura; `activas()` (la que alimenta la Cartelera) las excluye, para que una película recién cargada no aparezca como comprable antes de tiempo.
@@ -61,19 +75,12 @@ Signals para todo el estado local y compartido (sesión y rol del usuario, butac
 
 ### Base de datos
 
-- `formato` (2D/3D/4D/5D) e `idioma` (doblada/subtitulada) son atributos de la **función**, no de la película.
+- `formato` (2D/3D/4D/5D) e `idioma` (doblada/subtitulada) son atributos de la **función**, no de la película ni de la sala.
 - Géneros: tabla `generos` (`id`, `nombre`) con el mismo patrón de RLS que el resto del catálogo, administrable desde `/admin/generos/nuevo`. Pero **sin** relación N:N con películas — `peliculas.generos` sigue siendo un array de texto (`text[]`), filtrado con `.overlaps()`/`.some()` en el cliente; el form de alta de película puebla el multi-select consultando `GeneroService.listar()`. Se evita la tabla puente (`pelicula_generos`) porque no aporta nada funcional extra.
 - `entradas` y `orden_productos` en tablas separadas. Un QR por orden (no uno por entrada), con dos estados de validación independientes (`estado_qr_entradas`, `estado_qr_candy`).
 
-### Diseño visual
 
-Hay un proyecto de diseño de referencia en claude.ai/design ("Plataforma de venta de entradas de cine") con el mockup de toda la app, que se va adoptando pantalla por pantalla (no de una sola vez): navbar, home (Próximamente, Más vendidas, Cartelera con buscador + chips de género), badge de rating dorado en las cards. Paleta oscura turquesa + rojo/coral, tokens de color en `src/styles.css`. El negocio se llama **Cinemax**.
 
-### Config y deploy
-
-- `src/environments/environments.ts` se commitea con la URL del proyecto Supabase y la **publishable key** 
-- Deploy a **Firebase Hosting** (`dist/tp-cine/browser`, rewrite catch-all a `index.html` para el routing de Angular). GitHub Actions despliega un preview por cada PR (`.github/workflows/firebase-hosting-pull-request.yml`); el deploy a producción es manual (`firebase deploy`) por ahora.
-- PWA instalable con `@angular/service-worker` (`ngsw-config.json`, `public/manifest.webmanifest`).
 
 ## Estructura del proyecto
 

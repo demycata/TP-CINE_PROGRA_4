@@ -299,14 +299,6 @@
   color: var(--color-texto-secundario);
 }
 
-.horario.seleccionado {
-  border-color: var(--color-primario);
-}
-
-.horario.seleccionado .precio {
-  color: var(--color-primario);
-}
-
 .tag-preventa {
   padding: 1px 6px;
   border-radius: var(--radio-borde);

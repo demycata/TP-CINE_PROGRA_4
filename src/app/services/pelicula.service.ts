@@ -1,6 +1,7 @@
 import { Service, inject } from '@angular/core';
 import { SupabaseService } from '../core/supabase/supabase.service';
 import { Pelicula } from '../models/pelicula.model';
+import { hoyISO } from '../shared/fecha.utils';
 
 @Service()
 export class PeliculaService {
@@ -15,7 +16,7 @@ export class PeliculaService {
 
     //excluye las que todavía no se estrenaron (esas van en "Próximamente", no en la cartelera comprable)
     activas() {
-        const hoy = new Date().toISOString().slice(0, 10);
+        const hoy = hoyISO();
         return this.supabase.client
             .from('peliculas')
             .select('*')
@@ -25,7 +26,7 @@ export class PeliculaService {
     }
 
     proximamente() {
-        const hoy = new Date().toISOString().slice(0, 10);
+        const hoy = hoyISO();
         return this.supabase.client
             .from('peliculas')
             .select('*')

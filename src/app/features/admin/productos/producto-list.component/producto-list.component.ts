@@ -1,3 +1,4 @@
+import { CurrencyPipe } from '@angular/common';
 import { Component, OnInit, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ProductoService } from '../../../../services/producto.service';
@@ -5,7 +6,7 @@ import { SpinnerComponent } from '../../../../shared/spinner.component/spinner.c
 import { FilaProducto } from '../../../../models/producto.model';
 
 @Component({
-  imports: [RouterLink, SpinnerComponent],
+  imports: [RouterLink, SpinnerComponent, CurrencyPipe],
   selector: 'app-producto-list',
   styleUrl: './producto-list.component.css',
   templateUrl: './producto-list.component.html',

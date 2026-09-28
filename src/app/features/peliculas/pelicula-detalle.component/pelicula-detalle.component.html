@@ -11,7 +11,7 @@
         <div class="fila"><span>Duración</span><span>{{ peli.duracion_minutos }} min</span></div>
         <div class="fila"><span>Clasificación</span><span>{{ peli.restriccion_edad ? '+' + peli.restriccion_edad : 'ATP' }}</span></div>
         @if (peli.fecha_estreno) {
-          <div class="fila"><span>Estreno</span><span>{{ estrenoTexto(peli.fecha_estreno) }}</span></div>
+          <div class="fila"><span>Estreno</span><span>{{ peli.fecha_estreno | date:'d MMM y' }}</span></div>
         }
       </div>
     </div>
@@ -21,15 +21,15 @@
 
       <div class="rating-bar">
         <div class="rating-numero">
-          <span class="numero">{{ promedio().toFixed(1) }}</span>
+          <span class="numero">{{ promedio() | number:'1.1-1' }}</span>
           <span class="sobre">/ 5</span>
         </div>
         <div class="rating-detalle">
-          <div class="estrellas">{{ estrellasTexto(promedio()) }}</div>
+          <div class="estrellas">{{ promedio() | estrellas }}</div>
           <div class="cantidad">{{ resenas().length }} {{ resenas().length === 1 ? 'reseña' : 'reseñas' }}</div>
         </div>
         <div class="separador"></div>
-        <span class="meta-linea">{{ metaLine(peli) }}</span>
+        <span class="meta-linea">{{ peli | metaPelicula }}</span>
         <div class="flex-1"></div>
         @if (funciones().length > 0) {
           <button type="button" class="btn-ver-funciones" (click)="scrollAFunciones()">Ver funciones</button>
@@ -75,8 +75,8 @@
                 [class.activo]="dia === diaSeleccionado()"
                 (click)="seleccionarDia(dia)"
               >
-                <span class="dia-semana">{{ diaSemana(dia) }}</span>
-                <span class="dia-numero">{{ diaNumero(dia) }}</span>
+                <span class="dia-semana">{{ dia | date:'EEE' }}</span>
+                <span class="dia-numero">{{ dia | date:'d' }}</span>
               </button>
             }
           </div>
@@ -93,14 +93,13 @@
                     <button
                       type="button"
                       class="horario"
-                      [class.seleccionado]="funcionSeleccionada()?.id === funcion.id"
                       (click)="seleccionarFuncion(funcion)"
                     >
-                      <span class="hora">{{ funcion.hora_inicio.slice(0, 5) }}</span>
+                      <span class="hora">{{ funcion.hora_inicio | slice:0:5 }}</span>
                       @if (enPreventa(funcion)) {
                         <span class="tag-preventa">Preventa</span>
                       }
-                      <span class="precio">${{ precioVigente(funcion) }}</span>
+                      <span class="precio">{{ precioVigente(funcion) | currency:'ARS':'symbol-narrow':'1.0-2' }}</span>
                     </button>
                   }
                 </div>
@@ -147,8 +146,8 @@
         } @else {
           <div class="resenas-grid">
             <div class="resumen-estrellas">
-              <div class="numero-grande">{{ promedio().toFixed(1) }}</div>
-              <div class="estrellas">{{ estrellasTexto(promedio()) }}</div>
+              <div class="numero-grande">{{ promedio() | number:'1.1-1' }}</div>
+              <div class="estrellas">{{ promedio() | estrellas }}</div>
               <div class="cantidad">{{ resenas().length }} {{ resenas().length === 1 ? 'reseña' : 'reseñas' }}</div>
             </div>
 
@@ -162,7 +161,7 @@
 </div>
                     <span class="autor">{{ r.autor }}</span>
                     <div class="flex-1"></div>
-                    <span class="estrellas">{{ estrellasTexto(r.estrellas) }}</span>
+                    <span class="estrellas">{{ r.estrellas | estrellas }}</span>
                   </div>
                   @if (r.comentario) {
                     <p class="comentario">{{ r.comentario }}</p>

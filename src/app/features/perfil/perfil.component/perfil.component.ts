@@ -1,10 +1,12 @@
 import { Component, OnInit, computed, signal } from '@angular/core';
+import { CurrencyPipe, DatePipe, SlicePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { Auth } from '../../../core/auth/auth';
 import { EntradaService } from '../../../services/entrada.service';
 import { ResenaService } from '../../../services/resena.service';
 import { ToastService } from '../../../shared/toast.service';
 import { SpinnerComponent } from '../../../shared/spinner.component/spinner.component';
+import { EstrellasPipe } from '../../../shared/pipes/estrellas.pipe';
 import { OrdenMisEntradas } from '../../../models/entrada.model';
 
 const LIMITE_CANCELACION_HORAS = 2;
@@ -18,7 +20,7 @@ interface PeliculaVista {
 }
 
 @Component({
-  imports: [RouterLink, SpinnerComponent],
+  imports: [RouterLink, SpinnerComponent, CurrencyPipe, DatePipe, SlicePipe, EstrellasPipe],
   selector: 'app-perfil',
   styleUrl: './perfil.component.css',
   templateUrl: './perfil.component.html',
@@ -43,7 +45,7 @@ export class PerfilComponent implements OnInit {
         const pelicula = funcion?.peliculas;
         if (!funcion || !pelicula) continue;
 
-        const inicioFuncion = new Date(`${funcion.fecha}T${funcion.hora_inicio}`);
+        const inicioFuncion = this.inicioFuncion(funcion);
         if (inicioFuncion.getTime() > ahora) continue; //todavía no pasó, no cuenta como "vista"
 
         const existente = vistas.get(pelicula.id);
@@ -92,22 +94,23 @@ export class PerfilComponent implements OnInit {
     this.cargando.set(false);
   }
 
+  private inicioFuncion(funcion: { fecha: string; hora_inicio: string }): Date {
+    return new Date(`${funcion.fecha}T${funcion.hora_inicio}`);
+  }
+
   butacasTexto(orden: OrdenMisEntradas): string {
     return orden.entradas
       .map((e) => e.butacas ? `${e.butacas.fila}${e.butacas.columna}` : '-')
       .join(', ');
   }
 
-  estrellasTexto(valor: number): string {
-    return '★'.repeat(valor) + '☆'.repeat(5 - valor);
-  }
 
   puedeCancelar(orden: OrdenMisEntradas): boolean {
     if (orden.estado !== 'pagada') return false;
     const funcion = orden.entradas[0]?.funciones;
     if (!funcion) return false;
 
-    const inicioFuncion = new Date(`${funcion.fecha}T${funcion.hora_inicio}`);
+    const inicioFuncion = this.inicioFuncion(funcion);
     const horasRestantes = (inicioFuncion.getTime() - Date.now()) / (1000 * 60 * 60);
     return horasRestantes > LIMITE_CANCELACION_HORAS;
   }

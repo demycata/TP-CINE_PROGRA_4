@@ -3,6 +3,7 @@ import { SupabaseService } from '../core/supabase/supabase.service';
 import { SalaService } from './sala.service';
 import { PeliculaService } from './pelicula.service';
 import { FuncionConSala, FuncionInput } from '../models/funcion.model';
+import { hoyISO } from '../shared/fecha.utils';
 
 const SIN_SALA_LIBRE = '23P01'; //codigo de error que devuelve supabase cuando no hay salas libres
 const BUFFER_MINUTOS = 30; //el tiempo que tiene que haber entre funciones
@@ -30,7 +31,7 @@ export class FuncionService {
     }
                                             //Es el principal
     listarPorPelicula(peliculaId: string) { //Este se usa para mostrar las funciones de una película en la página de inicio
-        const hoy = new Date().toISOString().slice(0, 10);
+        const hoy = hoyISO();
         return this.supabase.client
             .from('funciones')
             .select('id, sala_id, fecha, hora_inicio, hora_fin, formato, idioma, precio_base, precio_vip, precio_preventa, fecha_fin_preventa, salas(nombre)')
@@ -42,7 +43,7 @@ export class FuncionService {
 
     //true si hoy todavía está dentro de la ventana de preventa configurada para esa función
     enPreventa(funcion: Pick<FuncionConSala, 'precio_preventa' | 'fecha_fin_preventa'>): boolean {
-        const hoy = new Date().toISOString().slice(0, 10);
+        const hoy = hoyISO();
         return funcion.precio_preventa != null && !!funcion.fecha_fin_preventa && hoy <= funcion.fecha_fin_preventa;
     }
     //si esta en preventa devuelve el precio de preventa, sino el precio base. Se usa para mostrar el precio en la página de inicio y en la página de detalle de película

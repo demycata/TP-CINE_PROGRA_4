@@ -1,4 +1,5 @@
 import { Component, OnInit, computed, signal } from '@angular/core';
+import { CurrencyPipe, DatePipe, DecimalPipe, SlicePipe } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { PeliculaService } from '../../../services/pelicula.service';
 import { FuncionService } from '../../../services/funcion.service';
@@ -6,12 +7,14 @@ import { ResenaService } from '../../../services/resena.service';
 import { Auth } from '../../../core/auth/auth';
 import { ToastService } from '../../../shared/toast.service';
 import { SpinnerComponent } from '../../../shared/spinner.component/spinner.component';
+import { EstrellasPipe } from '../../../shared/pipes/estrellas.pipe';
+import { MetaPeliculaPipe } from '../../../shared/pipes/meta-pelicula.pipe';
 import { Pelicula } from '../../../models/pelicula.model';
 import { FuncionConSala } from '../../../models/funcion.model';
 import { Resena } from '../../../models/resena.model';
 
 @Component({
-  imports: [RouterLink, SpinnerComponent],
+  imports: [RouterLink, SpinnerComponent, CurrencyPipe, DatePipe, DecimalPipe, SlicePipe, EstrellasPipe, MetaPeliculaPipe],
   selector: 'app-pelicula-detalle',
   styleUrl: './pelicula-detalle.component.css',
   templateUrl: './pelicula-detalle.component.html',
@@ -19,7 +22,6 @@ import { Resena } from '../../../models/resena.model';
 export class PeliculaDetalleComponent implements OnInit {
   protected pelicula = signal<Pelicula | null>(null);
   protected funciones = signal<FuncionConSala[]>([]);
-  protected funcionSeleccionada = signal<FuncionConSala | null>(null);
   protected cargando = signal(true);
 
   protected resenas = signal<Resena[]>([]);
@@ -39,24 +41,20 @@ export class PeliculaDetalleComponent implements OnInit {
   protected dias = computed(() => [...new Set(this.funciones().map((f) => f.fecha))].sort());//devuelve un array con los dias de las funciones, sin repetir y ordenados 
 
 
-  //funcion para el front, sirve para mostrar las funciones agrupadas por sala, formato e idioma, y ordenadas por hora de inicio
-  protected gruposSala = computed(() => {//devuelve las funciones agrupadas del dia seleccionado por sala, formato e idioma, y ordenadas por hora de inicio
-    const dia = this.diaSeleccionado();
-    const mapa = new Map<string, { sala: string; formato: string; idioma: string; funciones: FuncionConSala[] }>();
+  //funcion para el front: agrupa las funciones del dia seleccionado por sala, formato e idioma.
+  //es un computed y no un pipe porque depende de dos signals (funciones y diaSeleccionado) y arma la estructura que recorre el @for, no formatea un valor.
+  //no hace falta ordenar por hora: listarPorPelicula ya las trae ordenadas por fecha y hora_inicio, y el Map respeta el orden en que se van agregando.
+  protected gruposSala = computed(() => {
+    const delDia = this.funciones().filter((f) => f.fecha === this.diaSeleccionado());//primero se queda solo con las funciones del dia elegido
+    const grupos = new Map<string, { sala: string; formato: string; idioma: string; funciones: FuncionConSala[] }>();//clave "sala|formato|idioma" => grupo con sus funciones
 
-    for (const f of this.funciones()) {
-      if (f.fecha !== dia) { continue; }
+    for (const f of delDia) {
       const clave = `${f.salas?.nombre}|${f.formato}|${f.idioma}`;
-      if (!mapa.has(clave)) {
-        mapa.set(clave, { sala: f.salas?.nombre ?? '', formato: f.formato, idioma: f.idioma, funciones: [] });
-      }
-      mapa.get(clave)!.funciones.push(f);
+      if (!grupos.has(clave)) grupos.set(clave, { sala: f.salas?.nombre ?? '', formato: f.formato, idioma: f.idioma, funciones: [] });//si es la primera funcion de ese grupo, lo crea vacio
+      grupos.get(clave)!.funciones.push(f);//agrega la funcion a su grupo
     }
 
-    return [...mapa.values()].map((grupo) => ({
-      ...grupo,
-      funciones: grupo.funciones.sort((a, b) => a.hora_inicio.localeCompare(b.hora_inicio)),//ordena las funciones por hora de inicio
-    }));
+    return [...grupos.values()];//convierte el Map en array para poder recorrerlo con @for en el template
   });
 
   protected formatosDisponibles = computed(() => [...new Set(this.funciones().map((f) => f.formato))]);
@@ -103,49 +101,20 @@ export class PeliculaDetalleComponent implements OnInit {
   }
 
   seleccionarFuncion(funcion: FuncionConSala) {
-    this.funcionSeleccionada.set(funcion);
-    this.router.navigate(['/peliculas', this.pelicula()!.id, 'funciones', this.funcionSeleccionada()!.id, 'butacas'])
+    this.router.navigate(['/peliculas', this.pelicula()!.id, 'funciones', funcion.id, 'butacas']);
   }
 
   seleccionarDia(dia: string) {
     this.diaSeleccionado.set(dia);
-    this.funcionSeleccionada.set(null);
   }
 
   scrollAFunciones() {
     document.getElementById('funciones')?.scrollIntoView({ behavior: 'smooth' });
   }
 
-  metaLine(peli: Pelicula): string {
-    const horas = Math.floor(peli.duracion_minutos / 60);
-    const minutos = peli.duracion_minutos % 60;
-    const duracion = horas > 0 ? `${horas}h ${minutos}m` : `${minutos}m`;
-    return [...(peli.generos ?? []), duracion].join(' · ');
-  }
 
-  estrenoTexto(fechaEstreno: string): string {
-    const meses = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
-    const fecha = new Date(`${fechaEstreno}T00:00:00`);
-    return `${fecha.getDate()} ${meses[fecha.getMonth()]}`;
-  }
 
-  diaSemana(fecha: string): string {
-    const dias = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'];
-    return dias[new Date(`${fecha}T00:00:00`).getDay()];
-  }
 
-  diaNumero(fecha: string): string {
-    return String(new Date(`${fecha}T00:00:00`).getDate());
-  }
-
-  iniciales(nombre: string): string {
-    return nombre
-      .trim()
-      .split(/\s+/)
-      .slice(0, 2)
-      .map((parte) => parte[0]?.toUpperCase() ?? '')
-      .join('');
-  }
 
   precioVigente(funcion: FuncionConSala): number {
     return this.funcionService.precioVigente(funcion);
@@ -157,10 +126,6 @@ export class PeliculaDetalleComponent implements OnInit {
 
 
 
-  estrellasTexto(valor: number): string {
-    const llenas = Math.round(valor);
-    return '★'.repeat(llenas) + '☆'.repeat(5 - llenas);
-  }
 
   seleccionarEstrellas(n: number) {
     this.estrellasElegidas.set(n);

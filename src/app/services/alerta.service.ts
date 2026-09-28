@@ -1,5 +1,6 @@
 import { Service, inject } from '@angular/core';
 import { SupabaseService } from '../core/supabase/supabase.service';
+import { hoyISO } from '../shared/fecha.utils';
 
 @Service()
 export class AlertaService {
@@ -29,7 +30,7 @@ export class AlertaService {
 
         if (!alertas || alertas.length === 0) return [];
 
-        const hoy = new Date().toISOString().slice(0, 10);
+        const hoy = hoyISO();
         const { data: funciones } = await this.supabase.client
             .from('funciones')
             .select('pelicula_id')

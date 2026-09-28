@@ -1,4 +1,5 @@
 import { Component, OnInit, computed, signal } from '@angular/core';
+import { DatePipe, DecimalPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { Auth } from '../../../core/auth/auth';
 import { PeliculaService } from '../../../services/pelicula.service';
@@ -9,9 +10,10 @@ import { ToastService } from '../../../shared/toast.service';
 import { Pelicula } from '../../../models/pelicula.model';
 import { HoverScaleDirective } from '../../../shared/hover-scale.directive';
 import { SpinnerComponent } from '../../../shared/spinner.component/spinner.component';
+import { MetaPeliculaPipe } from '../../../shared/pipes/meta-pelicula.pipe';
 
 @Component({
-  imports: [RouterLink, HoverScaleDirective, SpinnerComponent],
+  imports: [RouterLink, HoverScaleDirective, SpinnerComponent, DatePipe, DecimalPipe, MetaPeliculaPipe],
   selector: 'app-home',
   styleUrl: './home.component.css',
   templateUrl: './home.component.html',
@@ -21,7 +23,7 @@ export class HomeComponent implements OnInit {
   protected cartelera = signal<Pelicula[]>([]);
   protected proximamente = signal<Pelicula[]>([]);
   protected alertasActivas = signal<Set<string>>(new Set());
-  protected ratings = signal<Map<string, string>>(new Map());
+  protected ratings = signal<Map<string, number>>(new Map());
   protected generosDisponibles = signal<string[]>([]);
   protected cargando = signal(true);
 
@@ -96,7 +98,7 @@ export class HomeComponent implements OnInit {
     }
   }
 
-  protected rating(peliculaId: string): string | undefined {
+  protected rating(peliculaId: string): number | undefined {
     return this.ratings().get(peliculaId);
   }
 
@@ -121,11 +123,6 @@ export class HomeComponent implements OnInit {
     this.toast.mostrar('Listo, te vamos a avisar cuando esté disponible.');
   }
 
-  protected estrenoTexto(fechaEstreno: string): string {
-    const meses = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
-    const fecha = new Date(`${fechaEstreno}T00:00:00`);
-    return `Estreno ${fecha.getDate()} ${meses[fecha.getMonth()]}`;
-  }
 
   protected onBuscar(texto: string) {
     this.busqueda.set(texto);
@@ -144,10 +141,4 @@ export class HomeComponent implements OnInit {
     this.generosSeleccionados.set([]);
   }
 
-  protected metaLine(peli: Pelicula) {
-    const horas = Math.floor(peli.duracion_minutos / 60);
-    const minutos = peli.duracion_minutos % 60;
-    const duracion = horas > 0 ? `${horas}h ${minutos}m` : `${minutos}m`;
-    return [...(peli.generos ?? []), duracion].join(' · ');
-  }
 }

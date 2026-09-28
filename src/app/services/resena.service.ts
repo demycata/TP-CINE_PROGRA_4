@@ -45,7 +45,7 @@ export class ResenaService {
             .maybeSingle();
     }
 
-    async promedios(peliculaIds: string[]): Promise<Map<string, string>> {//devuelve una promesa con un Map que relaciona cada película con su promedio
+    async promedios(peliculaIds: string[]): Promise<Map<string, number>> {//devuelve una promesa con un Map que relaciona cada película con su promedio
         if (peliculaIds.length === 0) return new Map(); //si no hay peliculas no tiene sentido hacer la query, devolvemos un mapa vacio
 
         const { data } = await this.supabase.client
@@ -61,7 +61,7 @@ export class ResenaService {
         return new Map(
             [...porPelicula].map(([id, estrellas]) => [//construye un par [id, promedio] para el Map.
                 id,
-                (estrellas.reduce((suma, e) => suma + e, 0) / estrellas.length).toFixed(1),//calcula el promedio de estrellas y lo redondea a 1 decimal
+                estrellas.reduce((suma, e) => suma + e, 0) / estrellas.length,//calcula el promedio de estrellas (el redondeo a 1 decimal lo hace el pipe number en el template)
             ])
         );
     }

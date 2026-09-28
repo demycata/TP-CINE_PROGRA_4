@@ -75,7 +75,6 @@ export class Auth {
         });
 
         if (error) return { error };
-        if (!data.user) return { error: null };
 
         return { error: null };
     }

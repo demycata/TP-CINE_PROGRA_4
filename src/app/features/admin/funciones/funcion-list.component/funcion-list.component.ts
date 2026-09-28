@@ -1,3 +1,4 @@
+import { CurrencyPipe, DatePipe, SlicePipe } from '@angular/common';
 import { Component, OnInit, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { FuncionService } from '../../../../services/funcion.service';
@@ -5,7 +6,7 @@ import { SpinnerComponent } from '../../../../shared/spinner.component/spinner.c
 import { FilaFuncion } from '../../../../models/funcion.model';
 
 @Component({
-  imports: [RouterLink, SpinnerComponent],
+  imports: [RouterLink, SpinnerComponent, CurrencyPipe, DatePipe, SlicePipe],
   selector: 'app-funcion-list',
   styleUrl: './funcion-list.component.css',
   templateUrl: './funcion-list.component.html',

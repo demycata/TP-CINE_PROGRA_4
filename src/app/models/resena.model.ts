@@ -6,9 +6,3 @@ export interface Resena {
     usuario_id: string;
     autor: string;
 }
-
-export interface MiResena {
-    id: string;
-    estrellas: number;
-    comentario: string | null;
-}
